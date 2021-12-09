@@ -11,9 +11,9 @@ return "Hello world!"
 #+RESULTS:
 : Hello world!
 
-Ideally, the RUN button should be activable, should display "*...*" when being ran and change face once done (ongoing work, not sure it is possible).
+Ideally, the RUN button should be animated, should display "*...*" when being run and change face once done (ongoing work, not sure it is possible).
 
-Furthermore, since I learned at EmacsConf 2021 that an org file can be made executable, this could be transformed into an executable & elegant document, without the need to start Emacs explicitely. 
+Furthermore, since I learned at EmacsConf 2021 that an org file can be made executable, this could be transformed into an executable & elegant document, without the need to start Emacs explicitly. 
 
 
 * Code
