@@ -1,0 +1,161 @@
+
+* Notebook mode
+
+
+The goal of the *notebook mode* is to provide users with a clean and legible interface such that people not familiar with GNU Emacs can nonetheless run the whole document (using the button at the top right) or run individual code cells using the RUN button in the margin as illustrated below:
+
+#+begin_src python
+return "Hello world!"
+#+end_src
+
+#+RESULTS:
+: Hello world!
+
+Ideally, the RUN button should be activable, should display "*...*" when being ran and change face once done (ongoing work, not sure it is possible).
+
+Furthermore, since I learned at EmacsConf 2021 that an org file can be made executable, this could be transformed into an executable & elegant document, without the need to start Emacs explicitely. 
+
+
+* Code
+
+
+*1. Loading libraries*
+#+begin_src emacs-lisp :results none
+(require 'svg-lib)
+(require 'ob-python)
+(require 'nano-theme)
+#+end_src
+*2. Setup document layout*
+#+begin_src emacs-lisp :results none
+(org-mode)
+(org-indent-mode)
+(set-frame-size nil 86 48)
+(setq-default left-margin-width 5 right-margin-width 5)
+(set-window-buffer nil (current-buffer))
+(setq line-spacing 0)11
+(set-frame-parameter (selected-frame) 'internal-border-width 1)
+(set-face-attribute 'internal-border nil
+     :background (face-background 'nano-default-i))
+#+end_src
+*3. Header line format*
+#+begin_src emacs-lisp :results none
+(setq header-line-format
+      (concat " "
+              (propertize "GNU Emacs" 'face 'nano-strong)
+              " "
+              (propertize "—" 'face 'nano-faded)
+              " "
+              (propertize "Notebook" 'face 'nano-default-i)
+
+             (propertize " "
+                         'display `(space :align-to (- right 1)))
+             (propertize "RUN" 'display (svg-lib-tag "RUN" nil
+                               :padding 1
+                               :margin 0
+                               :stroke 2
+                               :radius 0
+                               :font-weight 500
+                               :background (face-foreground 'default)
+                               :foreground (face-background 'default)))))
+#+end_src
+*4. Header line style*
+#+begin_src emacs-lisp :results none
+(setq mode-line-format "")
+(set-face-attribute 'header-line nil
+     :foreground (face-foreground 'nano-default-i)
+     :background (face-background 'nano-default-i)
+     :box `(:line-width 8
+            :color ,(face-background 'nano-default-i)
+            :style nil)
+     :underline nil)
+#+end_src
+*5. Decorate top-level headers*
+#+begin_src emacs-lisp :results none
+(defun decorate-headers ()
+  (let* ((face `(:inherit nano-subtle
+                 :extend t))
+         (p1 (progn (forward-line -1) (point)))
+         (p2 (progn (forward-line +1) (point)))
+         (p3 (progn (forward-line +1) (point)))
+         (p4 (progn (forward-line +1) (point)))
+         (region-overlay  (make-overlay p1 p4)))
+
+    (overlay-put (make-overlay p1 p2)
+                 'face `( ;; :overline ,(face-foreground 'nano-faded)
+                         :extend t
+                         :height 0.5))
+
+    (overlay-put (make-overlay p3 p4)
+                 'face `( ;; :underline ,(face-foreground 'nano-faded)
+                         :extend t
+                         :height 0.5))
+
+    (overlay-put region-overlay 'face face)
+    (overlay-put region-overlay 'line-prefix
+     (concat 
+      (propertize " " 
+      'display `((margin right-margin)
+                ,(propertize "      " 'face face)))
+      (propertize " " 
+           'display `((margin left-margin)
+             ,(propertize "    " 'face face)))))
+
+    (overlay-put region-overlay 'wrap-prefix
+     (concat 
+      (propertize " " 
+      'display `((margin right-margin)
+                ,(propertize " " 'face face)))
+      (propertize " " 
+           'display `((margin left-margin)
+             ,(propertize " " 'face face)))))))
+
+(org-map-entries 'decorate-headers "LEVEL=1")
+#+end_src
+*6. Add RUN buttons in margin*
+#+begin_src emacs-lisp :results none
+(defun decorate-src-block (element)
+  (let* ((beg (org-element-property :begin element))
+         (region-overlay  (make-overlay beg (+ beg 1))))
+    ;; Dumb test to show how it could look for ran cells
+    (if (string= (org-element-property :language element) "python")
+        (overlay-put region-overlay 'before-string
+         (propertize " " 
+           'display `(((margin left-margin)
+           ,(svg-lib-tag "RUN" nil
+                         :font-weight 'regular
+                         :stroke 0 :radius 0 :margin 2
+                         :background (face-foreground 'default)
+                         :foreground (face-background 'default))))))
+      (overlay-put region-overlay 'before-string
+         (propertize " " 
+           'display `(((margin left-margin)
+           ,(svg-lib-tag "RUN" nil
+                         :font-weight 'regular
+                         :stroke 2 :radius 0 :margin 2
+                         :foreground (face-foreground 'nano-faded)
+                         :background (face-background 'default)))))))))
+
+(org-element-map (org-element-parse-buffer)
+                 '(src-block) #'decorate-src-block)
+#+end_src
+*7. Add OUT tags in margin*
+#+begin_src emacs-lisp :results none
+(defun decorate-out-block (element)
+  (let* ((beg (org-element-property :begin element))
+         (region-overlay  (make-overlay beg (+ beg 1))))
+    (overlay-put region-overlay 'before-string
+       (propertize " " 
+           'display `(((margin left-margin)
+           ,(svg-lib-tag "OUT" nil
+               :font-weight 'regular
+               :stroke 2 :radius 0 :margin 2
+               :foreground (face-foreground 'default)
+               :background (face-background 'default))))))))
+
+(org-element-map (org-element-parse-buffer)
+                 '(fixed-width) #'decorate-out-block)
+
+;;(org-element-map (org-element-parse-buffer) '(fixed-width) #'identity)
+
+#+end_src
+
