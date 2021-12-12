@@ -1,0 +1,25 @@
+
+* Notebook mode
+
+
+The goal of the *notebook mode* is to provide users with a clean and legible interface such that people not familiar with GNU Emacs can nonetheless run the whole document (using the button at the top right) or run individual code cells using the RUN button in the margin as illustrated below:
+
+#+begin_src emacs-lisp :results none
+(require 'ob-python)
+#+end_src
+
+#+begin_src python
+import time
+time.sleep(3)
+#+end_src
+
+#+begin_src python
+import time
+time.sleep(3)
+#+end_src
+
+#+begin_src python
+import time
+time.sleep(3)
+#+end_src
+
