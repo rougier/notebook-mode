@@ -13,13 +13,22 @@ import time
 time.sleep(3)
 #+end_src
 
-#+begin_src python
-import time
-time.sleep(3)
-#+end_src
+#+RESULTS:
+: None
 
 #+begin_src python
 import time
 time.sleep(3)
 #+end_src
+
+#+RESULTS:
+: None
+
+#+begin_src python
+import time
+time.sleep(3)
+#+end_src
+
+#+RESULTS:
+: None
 

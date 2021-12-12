@@ -56,11 +56,11 @@
                         :radius 0 :font-weight 'normal
                         :foreground  (face-foreground 'font-lock-comment-face nil t)
                         :background  (face-background 'font-lock-comment-face nil 'default))
-    :run-1 ,(svg-lib-tag "•••" nil
-                        :padding 1 :margin 2 :stroke 2
+    :run-1 ,(svg-lib-tag "RUN" nil
+                        :padding 1 :margin 2 :stroke 0
                         :radius 0 :font-weight 'normal
-                        :foreground  (face-foreground 'default)
-                        :background  (face-background 'default))
+                        :foreground  (face-background 'warning nil 'default)
+                        :background  (face-foreground 'warning nil 'default))
     :run-2 ,(svg-lib-tag "RUN" nil
                         :padding 1 :margin 2 :stroke 0
                         :radius 0 :font-weight 'semibold
@@ -71,7 +71,7 @@
                         :radius 0 :font-weight 'normal
                         :foreground  (face-foreground 'font-lock-comment-face nil t)
                         :background  (face-background 'font-lock-comment-face nil 'default))
-    :out-1 ,(svg-lib-tag "•••" nil
+    :out-1 ,(svg-lib-tag "???" nil
                         :padding 1 :margin 2 :stroke 2
                         :radius 0 :font-weight 'normal
                         :foreground  (face-foreground 'font-lock-comment-face nil t)
@@ -82,9 +82,14 @@
                         :foreground  (face-foreground 'default)
                         :background  (face-background 'default))))
 
-(defun notebook--regular-tag (tag)
+
+(defun notebook--regular-tag (tag function help)
   "Return a string displaying svg TAG"
-  (propertize " " 'display (plist-get notebook--tags tag)))
+  (let ((map (make-sparse-keymap)))
+    (define-key map [header-line mouse-1] function)
+    (propertize " " 'local-map map 
+                    'help-echo help
+                    'display (plist-get notebook--tags tag))))
 
 (defun notebook--margin-tag (tag)
   "Return a string displaying svg TAG to be inserted in the left margin"
@@ -189,16 +194,6 @@
         (goto-char location)
         (notebook--tag-block)))))
 
-(advice-add 'org-babel-execute-src-block :before
-            #'notebook--execute-src-block-before)
-
-(advice-add 'org-babel-execute-src-block :after
-            #'notebook--execute-src-block-after)
-            
-(advice-add 'org-babel-remove-result :before
-            #'notebook--remove-result-before)
-
-
 
 (defun notebook--activate ()
 
@@ -230,9 +225,13 @@
         (concat " " (propertize "GNU Emacs" 'face 'nano-strong)
                 " " (propertize "—" 'face 'nano-faded)
                 " " (propertize "Notebook" 'face 'nano-default-i)
-                (propertize " " 'display `(space :align-to (- right 10)))
-                " " (notebook--regular-tag :run)
-                " " (notebook--regular-tag :export)))
+                (propertize " " 'display `(space :align-to (- right 8)))
+                    (notebook--regular-tag :run
+                                           'notebook-run-all
+                                           "Run all source cells")
+                " " (notebook--regular-tag :clear
+                                           'notebook-clear-all
+                                           "Clear all result cells")))
 
   ;; Top level header decorations
   (org-map-entries 'notebook--decorate-headers "LEVEL=1")
@@ -244,7 +243,15 @@
   (notebook--tag-out-blocks :out-0)
 
   ;; Install margin click handler
-  (local-set-key [left-margin mouse-1] #'notebook--margin-click))
+  (local-set-key [left-margin mouse-1] #'notebook--margin-click)
+
+  ;; Install babel advices
+  (advice-add 'org-babel-execute-src-block :before
+              #'notebook--execute-src-block-before)
+  (advice-add 'org-babel-execute-src-block :after
+              #'notebook--execute-src-block-after)
+  (advice-add 'org-babel-remove-result :before
+              #'notebook--remove-result-before))
   
 
 (defun notebook--deactivate ())
