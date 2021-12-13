@@ -66,7 +66,7 @@
                         :radius 0 :font-weight 'semibold
                         :foreground  (face-background 'default)
                         :background  (face-foreground 'default))
-    :out-0 ,(svg-lib-tag "OUT" nil
+    :out-0 ,(svg-lib-tag "???" nil
                         :padding 1 :margin 2 :stroke 2
                         :radius 0 :font-weight 'normal
                         :foreground  (face-foreground 'font-lock-comment-face nil t)
@@ -132,7 +132,7 @@
 
 (defun notebook--decorate-headers ()
   ""
-  (let* ((face `(:inherit nano-subtle :extend t))
+  (let* ((face `(:inherit region :extend t))
          (p1 (progn (forward-line -1) (point)))
          (p2 (progn (forward-line +1) (point)))
          (p3 (progn (forward-line +1) (point)))
@@ -210,23 +210,26 @@
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.75))))
   (set-frame-parameter (selected-frame) 'internal-border-width 1)
   (set-face-attribute 'internal-border (selected-frame)
-                      :background (face-background 'nano-default-i))
+                      :background (face-foreground 'default))
   (set-face-attribute 'internal-border t
-                      :background (face-background 'nano-default))
+                      :background (face-background 'default))
   (face-remap-add-relative 'header-line
-     `(:foreground ,(face-foreground 'nano-default-i)
-       :background ,(face-background 'nano-default-i)))
+     `(:foreground ,(face-background 'default)
+       :background ,(face-foreground 'default)))
   (face-remap-add-relative 'header-line 
        :box `(:line-width 8
-              :color ,(face-background 'nano-default-i)
+              :color ,(face-foreground 'default)
               :style nil))
   
   ;; Header and mode line
   (setq mode-line-format nil)
   (setq header-line-format
-        (concat " " (propertize "GNU Emacs" 'face 'nano-strong)
-                " " (propertize "—" 'face 'nano-faded)
-                " " (propertize "Notebook" 'face 'nano-default-i)
+        (concat " " (propertize "GNU Emacs"
+                                'face `(:inherit 'bold
+                                        :foreground ,(face-background 'default)))
+                " " (propertize "—" 'face 'font-lock-comment-face)
+                " " (propertize "Notebook" 
+                                'face `(:foreground ,(face-background 'default)))
                 (propertize " " 'display `(space :align-to (- right 8)))
                     (notebook--regular-tag :run
                                            'notebook-run-all
@@ -256,7 +259,14 @@
               #'notebook--remove-result-before))
   
 
-(defun notebook--deactivate ())
+(defun notebook--deactivate ()
+  ;; Remove babel advices
+  (advice-remove 'org-babel-execute-src-block 
+                 #'notebook--execute-src-block-before)
+  (advice-remove 'org-babel-execute-src-block
+                 #'notebook--execute-src-block-after)
+  (advice-remove 'org-babel-remove-result
+                 #'notebook--remove-result-before))
 
 (defun notebook--margin-click (event)
   (interactive "e")
@@ -279,7 +289,7 @@
   (org-babel-map-src-blocks nil (org-babel-remove-result)))
 
 (define-minor-mode notebook-mode
-  "Toggle nano-modeline minor mode"
+  "Toggle notebook mode"
   :group 'org-mode
   :global t
   :init-value nil
