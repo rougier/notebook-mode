@@ -102,7 +102,8 @@
          (beg (org-element-property :begin element))
          (overlay (progn (remove-overlays beg (+ beg 1))
                          (make-overlay beg (+ beg )))))
-    (if tag
+    (when tag
+        (overlay-put overlay 'notebook-tag t)
         (overlay-put overlay 'before-string (notebook--margin-tag tag)))))
 
 (defun notebook--tag-src-block (&optional tag)
@@ -182,7 +183,8 @@
     (save-excursion
       (goto-char org-babel-current-src-block-location)
       (notebook--tag-src-block :run-2)
-      (notebook--tag-out-block :out-2)))
+      (notebook--tag-out-block :out-2)
+      (org-redisplay-inline-images)))
   (redisplay t))
 
 (defun notebook--remove-result-before (&optional info keep-keyword)
@@ -269,6 +271,7 @@
 
 (defun notebook-clear-all ()
   (interactive)
+  (remove-overlays (point-min) (point-max) 'notebook-tag t)
   (org-babel-map-src-blocks nil (org-babel-remove-result)))
 
 (defun notebook-clear-below-point ()
