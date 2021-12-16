@@ -1,0 +1,204 @@
+/*
+ * Cascading stylesheet for GNU Emacs notebooks
+ * Nicolas P. Rougier - December 202
+ * Released under a Creative Commons CC-BY 4.0 license
+ */
+
+@charset "utf-8";
+@import url('https://fonts.googleapis.com/css?family=Roboto:300,400,500');
+@import url('https://fonts.googleapis.com/css?family=Roboto Slab:300,400,500');
+@import url('https://fonts.googleapis.com/css?family=Roboto Condensed:300,400,500'); 
+
+body {
+    font-family: "Roboto", sans;
+    font-size: 16px;
+    font-weight: 300;
+    line-height: 1.3em;
+}
+
+#content {
+    margin: 0 auto;
+    max-width: 720px;
+    margin-top: 5em;
+    margin-bottom: 5em;
+}
+
+a {
+    color: #673AB7;
+    text-decoration: none;
+/*    font-weight: 400;*/
+}
+
+h1, h2, h3 {
+    font-family: "Roboto Slab", serif;
+    font-weight: 400;
+}
+
+h1.title {
+    font-weight: 400;
+    line-height: 0.75em;
+    padding-top: 1.em;
+    padding-bottom: 0.5em;
+}
+h1 span.subtitle {
+    font-size: 16px;
+    font-weight: 300;
+}
+h2 {
+    clear: both;
+    padding-top: 1em;
+    padding-bottom: 0em;
+}
+
+
+p {
+    text:align: justify;
+/*    column-count: 2;*/
+    text-align: justify;
+    text-justify: inter-word;
+    hyphens: auto;
+}
+
+div.abstract {
+    background: #f9f9ff;
+    padding: .75em 1em .75em 1em;
+    line-height: 1.25em;
+    font-family: "Roboto Condensed", sans-serif;
+    border: .5px solid #555599;
+}
+div.abstract p {
+    column-count: 1;
+    margin: 0 0 0.5em 0;
+}
+div.abstract p::before {
+    content: "Abstract:"; 
+    font-weight: 400;
+}
+div.keywords p {
+    margin: 0;
+}
+div.keywords p::before {
+    content: "Keywords:"; 
+    font-weight: 400;
+}
+div.license p {
+    margin: 0;
+}
+div.license p::before {
+    content: "License:"; 
+    font-weight: 400;
+}
+div.environment p::before {
+    content: "Environment:"; 
+    font-weight: 400;
+}
+div.environment p {
+    margin: 0;
+}
+
+div.figure {
+    padding: 0.50em .00em 0.75em .00em;
+}
+div.figure p {
+    column-count: 1;
+    line-height: 1.2em;
+    font-family: "Roboto Condensed", sans-serif;
+}
+div.sidefig::after {
+    display: block;
+    content: "";
+    clear: both;
+}
+div.sidefig div.figure p:nth-of-type(1) {
+    width: 60%;
+    float: left;
+}
+div.sidefig div.figure p:nth-of-type(2) {
+    font-size: 95%;
+    /*    border-top: 1px solid black; */
+    background-color: #f9f9ff;
+    padding: 1em;
+}
+div.sidefig div.figure img {
+    width: 100%;
+}
+
+div.figure img {
+    width: 100%;
+}
+span.figure-number {
+    font-weight: 500;
+}
+
+/* --- Footnote ------------------------------------------------------------ */
+div.footpara {
+    display: inline-block;
+}
+h2.footnotes {
+    font-size: 16px;
+    width: 50%;
+    border-bottom: 1px solid black;
+}
+p.footpara {
+    column-count: 1;
+    line-height: 1.25em;
+    font-family: "Roboto Condensed", sans-serif;
+    margin: 0;
+}
+sup {
+    font-size: 0.75em;
+    vertical-align: top;
+    position: relative; top: -0.5em;
+}
+
+/* --- Block quote --------------------------------------------------------- */
+blockquote p {
+    font-size: 95%;
+    line-height: 1.15em;
+    column-count: 1;
+    padding-top: 1em;
+    padding-bottom: 1.5em;
+}
+
+/* --- Source blocks ------------------------------------------------------- */
+
+pre.example::before {
+    display: block;
+    background-color: #fffff;
+    content: "Output";
+    font-family: "Roboto Condensed", sans-serif;
+    font-weight: 400;
+    padding-bottom: 0.25em;
+}
+
+pre.example {
+    font-size: 95%;
+    background-color: #f9f9ff;
+    line-height: 1.4em;
+    font-family: "Roboto Mono", sans-serif;
+    font-weight: 300;
+    padding: 0.5em 1em 0.5em 1em;
+}
+
+pre.src {
+    font-size: 85%;
+    line-height: 1.4em;
+    font-family: "Roboto Mono", sans-serif;
+    font-weight: 300;
+    padding: 0;
+    margin: 0;
+}
+div.org-src-container {
+    border: .5px solid #555599;
+    padding: 0.50em 1.00em 0.75em 1.00em;
+    background-color: #f9f9ff;
+    margin-bottom: 0.5em;
+}
+label.org-src-name {
+    display: block;
+    font-family: "Roboto Condensed", sans-serif;
+    padding-bottom: .25em;
+}
+span.listing-number {
+    font-weight: 500;
+}
