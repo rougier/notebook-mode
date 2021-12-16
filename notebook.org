@@ -29,9 +29,7 @@ Creative Commons CC-BY 4.0
 
 #+end_abstract
 
-
 * Introduction
-
 
 #+begin_quote
     Literate programming is a programming paradigm introduced by [[https://en.wikipedia.org/wiki/Donald_Knuth][Donald Knuth]] in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [cite:@Knuth:1984]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. --- [[https://en.wikipedia.org/wiki/Literate_programming][Wikipedia]]
