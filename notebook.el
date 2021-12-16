@@ -205,10 +205,10 @@
   (org-indent-mode)
   (org-hide-block-all)
   (set-frame-size nil 86 48)
-  (set-window-margins nil 5 5)
+  (set-window-margins nil 6 6)
   (setq line-spacing 0)
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.75))))
-  (set-frame-parameter (selected-frame) 'internal-border-width 1)
+  (set-frame-parameter (selected-frame) 'internal-border-width 0)
   (set-face-attribute 'internal-border (selected-frame)
                       :background (face-foreground 'default))
   (set-face-attribute 'internal-border t
@@ -225,7 +225,7 @@
   (setq mode-line-format nil)
   (setq header-line-format
         (concat " " (propertize "GNU Emacs"
-                                'face `(:inherit 'bold
+                                'face `(:inherit bold
                                         :foreground ,(face-background 'default)))
                 " " (propertize "—" 'face 'font-lock-comment-face)
                 " " (propertize "Notebook" 
@@ -234,9 +234,12 @@
                     (notebook--regular-tag :run
                                            'notebook-run-all
                                            "Run all source cells")
-                " " (notebook--regular-tag :clear
-                                           'notebook-clear-all
-                                           "Clear all result cells")))
+                ;; " " (notebook--regular-tag :clear
+                ;;                           'notebook-clear-all
+                ;;                           "Clear all result cells")
+                " " (notebook--regular-tag :export
+                                           'notebook-export
+                                           "Export notebook to HTML")))
 
   ;; Top level header decorations
   (org-map-entries 'notebook--decorate-headers "LEVEL=1")
@@ -245,7 +248,7 @@
   (notebook--tag-src-blocks :run-0)
 
   ;; Tag result blocks
-  (notebook--tag-out-blocks :out-0)
+  ;; (notebook--tag-out-blocks :out-0)
 
   ;; Install margin click handler
   (local-set-key [left-margin mouse-1] #'notebook--margin-click)
@@ -255,8 +258,9 @@
               #'notebook--execute-src-block-before)
   (advice-add 'org-babel-execute-src-block :after
               #'notebook--execute-src-block-after)
-  (advice-add 'org-babel-remove-result :before
-              #'notebook--remove-result-before))
+  ;; (advice-add 'org-babel-remove-result :before
+  ;;            #'notebook--remove-result-before)
+  )
   
 
 (defun notebook--deactivate ()
@@ -265,8 +269,9 @@
                  #'notebook--execute-src-block-before)
   (advice-remove 'org-babel-execute-src-block
                  #'notebook--execute-src-block-after)
-  (advice-remove 'org-babel-remove-result
-                 #'notebook--remove-result-before))
+  ;; (advice-remove 'org-babel-remove-result
+  ;;               #'notebook--remove-result-before)
+  )
 
 (defun notebook--margin-click (event)
   (interactive "e")
@@ -278,6 +283,10 @@
 (defun notebook-run-all ()
   (interactive)
   (org-babel-execute-buffer))
+
+(defun notebook-export ()
+  (interactive)
+  (org-html-export-to-html))
 
 (defun notebook-clear-all ()
   (interactive)
