@@ -1,161 +1,180 @@
 
-* Notebook mode
-
-
-The goal of the *notebook mode* is to provide users with a clean and legible interface such that people not familiar with GNU Emacs can nonetheless run the whole document (using the button at the top right) or run individual code cells using the RUN button in the margin as illustrated below:
-
-#+begin_src python
-return "Hello world!"
+#+begin_setup
+#+begin_src emacs-lisp :results none :exports none
+(setq org-cite-csl-styles-dir ".")
+(setq org-babel-python-command "/opt/anaconda3/bin/python")
+(require 'ob-python)
+(require 'oc-csl)
+nil
 #+end_src
+#+end_setup
+#+begin_abstract
+Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
 
-#+RESULTS:
+#+begin_keywords
+#+KEYWORDS:
+GNU Emacs, org-mode, org-babel, notebook, literate programming.
+#+end_keywords
+
+#+begin_environment
+#+begin_src python :results raw :exports results :var python=python-version emacs=emacs-version org=org-version
+return f"{emacs}, {org} & {python}"
+#+end_src
+#+end_environment
+
+#+begin_license
+Creative Commons CC-BY 4.0
+#+end_license
+
+
+#+end_abstract
+
+
+* Introduction
+
+
+#+begin_quote
+    Literate programming is a programming paradigm introduced by [[https://en.wikipedia.org/wiki/Donald_Knuth][Donald Knuth]] in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [cite:@Knuth:1984]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. --- [[https://en.wikipedia.org/wiki/Literate_programming][Wikipedia]]
+#+end_quote
+
+Emacs is an /extensible, customizable, self-documenting, real-time display editor/ whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is [[https://orgmode.org/][org-mode]] which is a major mode for /keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system/. The goal of the [[https://github.com/rougier/notebook-mode][notebook mode]] is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top right) or run individual code cells using the run button in the margin as illustrated on figure [[fig:teaser]]. The populated notebook can then be exported to HTML using the export button at the top right. The HTML document you're currently reading is actually an export of the file [[file:notebook.org][notebook.org]].
+
+#+begin_sidefig
+#+name: fig:teaser
+#+caption: *The org notebook as rendered inside GNU Emacs.* [[https://www.gnu.org/software/emacs/][GNU Emacs]] can be hacked such as to offer a clean and legible interface for the notebook that is is actually a regular [[https://orgmode.org/][org-mode]] document. This means a user can write and run the notebook fully inside Emacs, without the need to install any extra tools (but the different languages used inside the notebook, of course). In other words, everything is handled by Emacs. The advantage of the org notebook is that you can have block of code in any language and even mix them. This actually what have been used to display the enviroment in the abstract box, mixing Emacs lisp and Python. The theme used in the screenshot is [[https://github.com/rougier/nano-theme][NΛNO Theme]] (available on [[https://elpa.gnu.org/][ELPA]]) and the font is [[https://fonts.google.com/specimen/Roboto+Mono][Roboto Mono]]. See [cite:@Rougier:2020] for further details.
+[[file:notebook.png]]
+#+end_sidefig
+
+
+* Using the notebook
+
+
+Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing [[src:hello]] and the corresponding output).
+
+#+name: src:hello
+#+caption: Hello world in Python from the org notebook.
+#+begin_src python :results output :exports both
+print("Hello world!")
+#+end_src
+#+results: src:hello
 : Hello world!
 
-Ideally, the RUN button should be activable, should display "*...*" when being ran and change face once done (ongoing work, not sure it is possible).
+What is more interesting is the ability for the notebook to produce figures from code and to associate a caption and a label such that they can be inserted directly into the document and referenced elsewhere in the text. Let's try that with Python and matplotlib in order to produce the figure [[fig:oscillations]] below.
 
-Furthermore, since I learned at EmacsConf 2021 that an org file can be made executable, this could be transformed into an executable & elegant document, without the need to start Emacs explicitely. 
-
-
-* Code
-
-
-*1. Loading libraries*
-#+begin_src emacs-lisp :results none
-(require 'svg-lib)
-(require 'ob-python)
-(require 'nano-theme)
+#+name: fig:oscillations
+#+begin_src python :results value file :exports results
+import numpy as np
+import matplotlib.pyplot as plt
+fig = plt.figure(figsize=(8,1))
+ax = fig.add_axes([0,0,1,1], frameon=False)
+ax.axis("off")
+X = np.linspace(-10*np.pi, 10*np.pi, 500)
+ax.plot(X, np.sin(X)/X)
+ax.set_xlim(X.min(), X.max())
+plt.savefig("figure.png", dpi=200)
+return "figure.png"
 #+end_src
-*2. Setup document layout*
-#+begin_src emacs-lisp :results none
-(org-mode)
-(org-indent-mode)
-(set-frame-size nil 86 48)
-(setq-default left-margin-width 5 right-margin-width 5)
-(set-window-buffer nil (current-buffer))
-(setq line-spacing 0)11
-(set-frame-parameter (selected-frame) 'internal-border-width 1)
-(set-face-attribute 'internal-border nil
-     :background (face-background 'nano-default-i))
+#+label: fig:oscillations
+#+caption: Damped oscillations using $y=\frac{sin(x)}{x}$
+#+results: fig:oscillations
+[[file:figure.png]]
+
+From this simple example, you can start experimenting with literate
+programming in any language or combinations of languages. For
+example, the environment that is declared in the top box of this
+document is automatically generated when the document is exported and it mixes code in Python (to get Python version) and code in Emacs lisp (to get Emacs version). Possibilities are infinite.
+
+
+
+* References
+
+
+#+cite_export: csl acm-siggraph.csl
+#+bibliography: notebook.bib
+#+print_bibliography:
+
+
+* Notebook configuration :noexport:
+
+
+This section is used for configuring various settings in the notebook appearance as well as defining various options for the export in HTML or PDF formats. You can change any of these settings.
+
+** Document information
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+#+TITLE:        GNU Emacs Notebooks
+#+SUBTITLE:     [[https://www.labri.fr/perso/nrougier/][Nicolas P. Rougier]] — Bordeaux, December 2021
+#+AUTHOR:       Nicolas P. Rougier
+#+EMAIL:        nicolas.rougier@inria.fr
+#+DATE:         2021-12-13 Mon
+#+DESCRIPTION:  A GNU Emacs notebook demonstration
+#+OPTIONS:      toc:nil   
+
+** HTML export configuration
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+#+OPTIONS:   num:nil
+#+OPTIONS:   html-style:nil
+#+OPTIONS:   html-scripts:nil 
+#+OPTIONS:   html-postamble:nil
+#+OPTIONS:   broken-links:mark
+#+HTML_HEAD: <link rel="stylesheet" type="text/css" href="notebook.css" />
+
+** PDF export configuration
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+#+OPTIONS:
+
+** Code snippets
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
+
+*** Emacs version :lisp:
+
+#+name: emacs-version
+#+begin_src emacs-lisp :export none :results raw
+(format "[[https://www.gnu.org/software/emacs/][Emacs]] %d.%d"
+        emacs-major-version emacs-minor-version)
 #+end_src
-*3. Header line format*
-#+begin_src emacs-lisp :results none
-(setq header-line-format
-      (concat " "
-              (propertize "GNU Emacs" 'face 'nano-strong)
-              " "
-              (propertize "—" 'face 'nano-faded)
-              " "
-              (propertize "Notebook" 'face 'nano-default-i)
 
-             (propertize " "
-                         'display `(space :align-to (- right 1)))
-             (propertize "RUN" 'display (svg-lib-tag "RUN" nil
-                               :padding 1
-                               :margin 0
-                               :stroke 2
-                               :radius 0
-                               :font-weight 500
-                               :background (face-foreground 'default)
-                               :foreground (face-background 'default)))))
+*** Org mode version :lisp:
+
+#+name: org-version
+#+begin_src emacs-lisp :export none :results raw
+(format "[[https://www.gnu.org/software/emacs/][Org mode]] %s"
+        (org-version nil nil))
 #+end_src
-*4. Header line style*
-#+begin_src emacs-lisp :results none
-(setq mode-line-format "")
-(set-face-attribute 'header-line nil
-     :foreground (face-foreground 'nano-default-i)
-     :background (face-background 'nano-default-i)
-     :box `(:line-width 8
-            :color ,(face-background 'nano-default-i)
-            :style nil)
-     :underline nil)
+
+*** Python version :python:
+
+#+name: python-version
+#+begin_src python :export none :results raw
+import platform
+version = platform.python_version()
+return f"[[https://www.python.org/][Python]] {version}"
 #+end_src
-*5. Decorate top-level headers*
-#+begin_src emacs-lisp :results none
-(defun decorate-headers ()
-  (let* ((face `(:inherit nano-subtle
-                 :extend t))
-         (p1 (progn (forward-line -1) (point)))
-         (p2 (progn (forward-line +1) (point)))
-         (p3 (progn (forward-line +1) (point)))
-         (p4 (progn (forward-line +1) (point)))
-         (region-overlay  (make-overlay p1 p4)))
 
-    (overlay-put (make-overlay p1 p2)
-                 'face `( ;; :overline ,(face-foreground 'nano-faded)
-                         :extend t
-                         :height 0.5))
+*** Matplotlib figure preparation :python:
 
-    (overlay-put (make-overlay p3 p4)
-                 'face `( ;; :underline ,(face-foreground 'nano-faded)
-                         :extend t
-                         :height 0.5))
-
-    (overlay-put region-overlay 'face face)
-    (overlay-put region-overlay 'line-prefix
-     (concat 
-      (propertize " " 
-      'display `((margin right-margin)
-                ,(propertize "      " 'face face)))
-      (propertize " " 
-           'display `((margin left-margin)
-             ,(propertize "    " 'face face)))))
-
-    (overlay-put region-overlay 'wrap-prefix
-     (concat 
-      (propertize " " 
-      'display `((margin right-margin)
-                ,(propertize " " 'face face)))
-      (propertize " " 
-           'display `((margin left-margin)
-             ,(propertize " " 'face face)))))))
-
-(org-map-entries 'decorate-headers "LEVEL=1")
+#+name: pyfig-pre
+#+begin_src python :results file :exports none 
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
 #+end_src
-*6. Add RUN buttons in margin*
-#+begin_src emacs-lisp :results none
-(defun decorate-src-block (element)
-  (let* ((beg (org-element-property :begin element))
-         (region-overlay  (make-overlay beg (+ beg 1))))
-    ;; Dumb test to show how it could look for ran cells
-    (if (string= (org-element-property :language element) "python")
-        (overlay-put region-overlay 'before-string
-         (propertize " " 
-           'display `(((margin left-margin)
-           ,(svg-lib-tag "RUN" nil
-                         :font-weight 'regular
-                         :stroke 0 :radius 0 :margin 2
-                         :background (face-foreground 'default)
-                         :foreground (face-background 'default))))))
-      (overlay-put region-overlay 'before-string
-         (propertize " " 
-           'display `(((margin left-margin)
-           ,(svg-lib-tag "RUN" nil
-                         :font-weight 'regular
-                         :stroke 2 :radius 0 :margin 2
-                         :foreground (face-foreground 'nano-faded)
-                         :background (face-background 'default)))))))))
 
-(org-element-map (org-element-parse-buffer)
-                 '(src-block) #'decorate-src-block)
-#+end_src
-*7. Add OUT tags in margin*
-#+begin_src emacs-lisp :results none
-(defun decorate-out-block (element)
-  (let* ((beg (org-element-property :begin element))
-         (region-overlay  (make-overlay beg (+ beg 1))))
-    (overlay-put region-overlay 'before-string
-       (propertize " " 
-           'display `(((margin left-margin)
-           ,(svg-lib-tag "OUT" nil
-               :font-weight 'regular
-               :stroke 2 :radius 0 :margin 2
-               :foreground (face-foreground 'default)
-               :background (face-background 'default))))))))
+*** Matplotlib figure finalization :python:
 
-(org-element-map (org-element-parse-buffer)
-                 '(fixed-width) #'decorate-out-block)
-
-;;(org-element-map (org-element-parse-buffer) '(fixed-width) #'identity)
-
+#+name: pyfig-post
+#+begin_src python :results file :exports none
+plt.savefig(filename, dpi=300)
+return filename
 #+end_src
 
