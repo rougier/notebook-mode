@@ -4,7 +4,7 @@
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/notebook-mode
-;; Version: 0.1
+;; Version: 0.2
 ;; Package-Requires: ((emacs "27.1"))
 ;; Keywords: org-mode, babel, notebook
 
@@ -29,280 +29,172 @@
 ;;
 ;;; News:
 ;;
-
-;;; Code:
+;; Version 0.2
+;; Moved buttons inside documents
+;;
+;; Version 0.1
+;; First proof of concept with buttons in margin
+;;
+;;; Code 
 (require 'org)
 (require 'svg-lib)
 
+(defvar notebook--active-tags nil)
 
-(defvar notebook--tags
-  `(:run   ,(svg-lib-tag "RUN" nil
-                         :padding 1 :margin 0 :stroke 2
-                         :radius 0 :font-weight 'semibold
-                         :foreground  (face-background 'default)
-                         :background  (face-foreground 'default))
-    :clear ,(svg-lib-tag "CLEAR" nil
-                         :padding 1 :margin 0 :stroke 2
-                         :radius 0 :font-weight 'semibold
-                         :foreground  (face-background 'default)
-                         :background  (face-foreground 'default))
-    :export ,(svg-lib-tag "EXPORT" nil
-                         :padding 1 :margin 0 :stroke 2
-                         :radius 0 :font-weight 'semibold
-                         :foreground  (face-background 'default)
-                         :background  (face-foreground 'default))
-    :run-0 ,(svg-lib-tag "RUN" nil
-                        :padding 1 :margin 2 :stroke 2
-                        :radius 0 :font-weight 'normal
-                        :foreground  (face-foreground 'font-lock-comment-face nil t)
-                        :background  (face-background 'font-lock-comment-face nil 'default))
-    :run-1 ,(svg-lib-tag "RUN" nil
-                        :padding 1 :margin 2 :stroke 0
-                        :radius 0 :font-weight 'normal
-                        :foreground  (face-background 'warning nil 'default)
-                        :background  (face-foreground 'warning nil 'default))
-    :run-2 ,(svg-lib-tag "RUN" nil
-                        :padding 1 :margin 2 :stroke 0
-                        :radius 0 :font-weight 'semibold
-                        :foreground  (face-background 'default)
-                        :background  (face-foreground 'default))
-    :out-0 ,(svg-lib-tag "???" nil
-                        :padding 1 :margin 2 :stroke 2
-                        :radius 0 :font-weight 'normal
-                        :foreground  (face-foreground 'font-lock-comment-face nil t)
-                        :background  (face-background 'font-lock-comment-face nil 'default))
-    :out-1 ,(svg-lib-tag "???" nil
-                        :padding 1 :margin 2 :stroke 2
-                        :radius 0 :font-weight 'normal
-                        :foreground  (face-foreground 'font-lock-comment-face nil t)
-                        :background  (face-background 'font-lock-comment-face nil 'default))
-    :out-2 ,(svg-lib-tag "OUT" nil
-                        :padding 1 :margin 2 :stroke 2
-                        :radius 0 :font-weight 'normal
-                        :foreground  (face-foreground 'default)
-                        :background  (face-background 'default))))
+(defun notebook--build-keywords (item)
+  "Internal.  Build the list of keyword from ITEM."
+  (let ((pattern  (format "\\(%s\\)" (car item)))
+        (tag      (nth 0 (cdr item)))
+        (callback (nth 1 (cdr item)))
+        (help     (nth 2 (cdr item))))
+    (when (and (symbolp tag) (fboundp tag))
+      (setq tag `(,tag (match-string 0))))
+    (setq tag ``(face nil
+                 display ,,tag
+                 ,@(if ,callback '(pointer hand))
+                 ,@(if ,help `(help-echo ,,help))
+                 ,@(if ,callback `(keymap (keymap (mouse-1  . ,,callback))))))
+    `(,pattern 1 ,tag)))
 
+(defun notebook-tag (tag face &optional inverse margin)
+  (let* ((margin (or margin 0))
+         (alignment (if margin 0.0 0.5)))
+    (if inverse
+        (svg-lib-tag tag nil
+                     :padding 1 :margin margin :stroke 0  :radius 3
+                     :font-weight 'semibold :alignment alignment
+                     :foreground  (face-background face nil 'default)
+                     :background  (face-foreground face nil 'default))
+      (svg-lib-tag tag nil
+                   :padding 1 :margin margin :stroke 2 :radius 3
+                   :font-weight 'regular  :alignment alignment
+                   :foreground  (face-foreground face nil 'default)
+                   :background  (face-background face nil 'default)))))
 
-(defun notebook--regular-tag (tag function help)
-  "Return a string displaying svg TAG"
-  (let ((map (make-sparse-keymap)))
-    (define-key map [header-line mouse-1] function)
-    (propertize " " 'local-map map 
-                    'help-echo help
-                    'display (plist-get notebook--tags tag))))
-
-(defun notebook--margin-tag (tag)
-  "Return a string displaying svg TAG to be inserted in the left margin"
-  (propertize " " 'display `(((margin left-margin)
-                              ,(plist-get notebook--tags tag)))))
-
-(defun notebook--tag-block (&optional tag)
-  "Add TAG to block at point"  
-  (let* ((element (org-element-at-point))
-         (beg (org-element-property :begin element))
-         (overlay (progn (remove-overlays beg (+ beg 1))
-                         (make-overlay beg (+ beg )))))
-    (when tag
-        (overlay-put overlay 'notebook-tag t)
-        (overlay-put overlay 'before-string (notebook--margin-tag tag)))))
-
-(defun notebook--tag-src-block (&optional tag)
-  (notebook--tag-block tag))
-
-(defun notebook--tag-src-blocks (&optional tag)
-  "Tag all source blocks with TAG"
-  (org-babel-map-executables nil
-    (notebook--tag-src-block tag)))
-
-(defun notebook--tag-out-block (&optional tag)
-  "Add TAG to block at point"  
-  (let* ((location (org-babel-where-is-src-block-result))
-   	     (case-fold-search t))
-      (when location
-        (save-excursion
-          (goto-char location)
-          (notebook--tag-block tag)))))
-
-(defun notebook--tag-out-blocks (&optional tag)
-  "Tag all result blocks with TAG"
-  (org-babel-map-executables nil
-    (notebook--tag-out-block tag)))
+(setq notebook-tags
+      '(("^#\\+call:" .     ((notebook-tag "CALL" 'org-tag)
+                             'notebook-call-at-point "Call function"))
+        ("call_" .         ((notebook-tag "CALL" 'default nil 1)
+                             'notebook-call-at-point "Call function"))
+        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-tag t)
+                             'notebook-run-at-point "Run code block"))
+        ("|RUN|" .          ((notebook-tag "RUN" 'org-tag t)))
+        ("|RUN ALL|" .      ((notebook-tag "RUN ALL" 'org-meta-line)
+                             'notebook-run "Run all notebook code blocks"))
+        ("|SETUP|" .        ((notebook-tag "SETUP" 'org-meta-line)
+                             'notebook-setup "Setup notebook environment"))
+        ("|EXPORT|" .       ((notebook-tag "EXPORT" 'org-meta-line)
+                             'notebook-export-html "Export the notebook to HTML"))
+        ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
+        ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
+        
+        ("^#\\+end_src" .   ((notebook-tag "END" 'org-tag)))
+        ("^#\\+caption:" .  ((notebook-tag "CAPTION" 'org-meta-line)))
+        ("^#\\+name:" .     ((notebook-tag "NAME" 'org-meta-line)))
+        ("^#\\+header:" .   ((notebook-tag "HEADER" 'org-meta-line)))
+        ("^#\\+label:" .    ((notebook-tag "LABEL" 'org-meta-line)))
+        ("^#\\+results:"  . ((notebook-tag "RESULTS" 'org-meta-line)))))
 
 
+(defun notebook--remove-text-properties (oldfun start end props  &rest args)
+  "This apply remove-text-properties with 'display removed from props"
+  (apply oldfun start end (org-plist-delete props 'display) args))
 
-(defun notebook--decorate-headers ()
-  ""
-  (let* ((face `(:inherit region :extend t))
-         (p1 (progn (forward-line -1) (point)))
-         (p2 (progn (forward-line +1) (point)))
-         (p3 (progn (forward-line +1) (point)))
-         (p4 (progn (forward-line +1) (point)))
-         (height (truncate (* (face-attribute 'default :height) .5)))
-         (region-overlay  (make-overlay p1 p4)))
+(defun notebook--remove-text-properties-on (args)
+  "This installs an advice around remove-text-properties"
+  (advice-add 'remove-text-properties
+              :around #'notebook--remove-text-properties))
 
-    (overlay-put (make-overlay p1 p2)
-                 'face `(:extend t :height ,height))
-    (overlay-put (make-overlay p3 p4)
-                 'face `(:extend t :height ,height))
-    (overlay-put region-overlay 'face face)
-    (overlay-put region-overlay 'line-prefix
-     (concat 
-      (propertize " " 
-      'display `((margin right-margin)
-                ,(propertize "      " 'face face)))
-      (propertize " " 
-           'display `((margin left-margin)
-             ,(propertize "     " 'face face)))))
+(defun notebook--remove-text-properties-off (args)
+  "This removes the advice around remove-text-properties"
+  (advice-remove 'remove-text-properties
+                 #'notebook--remove-text-properties))
 
-    (overlay-put region-overlay 'wrap-prefix
-     (concat 
-      (propertize " " 
-      'display `((margin right-margin)
-                ,(propertize " " 'face face)))
-      (propertize " " 
-           'display `((margin left-margin)
-             ,(propertize " " 'face face)))))))
+(defun notebook-run-at-point ()
+  (interactive)
+  (org-ctrl-c-ctrl-c)
+  (org-redisplay-inline-images))
 
-
-(defun notebook--execute-src-block-before (&optional arg info params)
-  (let* ((org-babel-current-src-block-location
-	      (or org-babel-current-src-block-location
-	          (nth 5 info)
-	          (org-babel-where-is-src-block-head))))
-    (save-excursion
-      (goto-char org-babel-current-src-block-location)
-      (notebook--tag-src-block :run-1)
-      (notebook--tag-out-block :out-1)))
-  (redisplay t))
-
-(defun notebook--execute-src-block-after (&optional arg info params)
-  (let* ((org-babel-current-src-block-location
-	      (or org-babel-current-src-block-location
-	          (nth 5 info)
-	          (org-babel-where-is-src-block-head))))
-    (save-excursion
-      (goto-char org-babel-current-src-block-location)
-      (notebook--tag-src-block :run-2)
-      (notebook--tag-out-block :out-2)
-      (org-redisplay-inline-images)))
-  (redisplay t))
-
-(defun notebook--remove-result-before (&optional info keep-keyword)
-  (notebook--tag-src-block :run-0)
-  (let ((location (org-babel-where-is-src-block-result nil info))
-	    (case-fold-search t))
-    (when location
-      (save-excursion
-        (goto-char location)
-        (notebook--tag-block)))))
-
-
-(defun notebook--activate ()
-
-  ;; Document layout
-  (setq org-startup-with-inline-images t)
-  (org-mode)
-  (org-indent-mode)
-  (org-hide-block-all)
-  (set-frame-size nil 86 48)
-  (set-window-margins nil 6 6)
-  (setq line-spacing 0)
-  (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.75))))
-  (set-frame-parameter (selected-frame) 'internal-border-width 0)
-  (set-face-attribute 'internal-border (selected-frame)
-                      :background (face-foreground 'default))
-  (set-face-attribute 'internal-border t
-                      :background (face-background 'default))
-  (face-remap-add-relative 'header-line
-     `(:foreground ,(face-background 'default)
-       :background ,(face-foreground 'default)))
-  (face-remap-add-relative 'header-line 
-       :box `(:line-width 8
-              :color ,(face-foreground 'default)
-              :style nil))
-  
-  ;; Header and mode line
-  (setq mode-line-format nil)
-  (setq header-line-format
-        (concat " " (propertize "GNU Emacs"
-                                'face `(:inherit bold
-                                        :foreground ,(face-background 'default)))
-                " " (propertize "—" 'face 'font-lock-comment-face)
-                " " (propertize "Notebook" 
-                                'face `(:foreground ,(face-background 'default)))
-                (propertize " " 'display `(space :align-to (- right 8)))
-                    (notebook--regular-tag :run
-                                           'notebook-run-all
-                                           "Run all source cells")
-                ;; " " (notebook--regular-tag :clear
-                ;;                           'notebook-clear-all
-                ;;                           "Clear all result cells")
-                " " (notebook--regular-tag :export
-                                           'notebook-export
-                                           "Export notebook to HTML")))
-
-  ;; Top level header decorations
-  (org-map-entries 'notebook--decorate-headers "LEVEL=1")
-
-  ;; Tag sources blocks
-  (notebook--tag-src-blocks :run-0)
-
-  ;; Tag result blocks
-  ;; (notebook--tag-out-blocks :out-0)
-
-  ;; Install margin click handler
-  (local-set-key [left-margin mouse-1] #'notebook--margin-click)
-
-  ;; Install babel advices
-  (advice-add 'org-babel-execute-src-block :before
-              #'notebook--execute-src-block-before)
-  (advice-add 'org-babel-execute-src-block :after
-              #'notebook--execute-src-block-after)
-  ;; (advice-add 'org-babel-remove-result :before
-  ;;            #'notebook--remove-result-before)
-  )
-  
-
-(defun notebook--deactivate ()
-  ;; Remove babel advices
-  (advice-remove 'org-babel-execute-src-block 
-                 #'notebook--execute-src-block-before)
-  (advice-remove 'org-babel-execute-src-block
-                 #'notebook--execute-src-block-after)
-  ;; (advice-remove 'org-babel-remove-result
-  ;;               #'notebook--remove-result-before)
-  )
-
-(defun notebook--margin-click (event)
-  (interactive "e")
-  (mouse-set-point event)
-  (beginning-of-line)
-  (forward-line)
+(defun notebook-call-at-point ()
+  (interactive)
   (org-ctrl-c-ctrl-c))
 
-(defun notebook-run-all ()
+(defun notebook-setup ()
+  (interactive)
+  (setq org-cite-csl-styles-dir ".")
+  (setq org-babel-python-command "/opt/anaconda3/bin/python")
+  (require 'ob-python)
+  (require 'oc-csl))
+
+(defun notebook-run ()
   (interactive)
   (org-babel-execute-buffer))
 
-(defun notebook-export ()
+(defun notebook-export-html ()
   (interactive)
   (org-html-export-to-html))
 
-(defun notebook-clear-all ()
-  (interactive)
-  (remove-overlays (point-min) (point-max) 'notebook-tag t)
-  (org-babel-map-src-blocks nil (org-babel-remove-result)))
+(defun notebook-mode-on ()
+  "Activate SVG tag mode."
 
-(defun notebook-clear-below-point ()
-  (interactive)
-  (org-babel-map-src-blocks nil (org-babel-remove-result)))
+  (add-to-list 'font-lock-extra-managed-props 'display)
+  (setq font-lock-keywords-case-fold-search t)
+  (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
+  (setq org-confirm-babel-evaluate nil)
+  (setq org-startup-with-inline-images t)
+  (org-redisplay-inline-images)
+  (org-indent-mode)
+  (org-hide-block-all)
+
+  ;; Remove any active tags
+  (when notebook--active-tags
+    (font-lock-remove-keywords nil
+          (mapcar #'notebook--build-keywords notebook--active-tags)))
+
+  ;; Install keyword tags
+  (when notebook-tags
+    (font-lock-add-keywords nil
+                            (mapcar #'notebook--build-keywords notebook-tags)))
+  (setq notebook--active-tags (copy-sequence notebook-tags))
+
+  ;; Install advices on remove-text-properties (before & after). This
+  ;; is a hack to prevent org mode from removing SVG tags that use the
+  ;; 'display property
+  (advice-add 'org-fontify-meta-lines-and-blocks
+            :before #'notebook--remove-text-properties-on)
+  (advice-add 'org-fontify-meta-lines-and-blocks
+              :after #'notebook--remove-text-properties-off)
+
+  ;; Redisplay everything to show tags
+  (font-lock-flush))
+
+(defun notebook-mode-off ()
+  "Deactivate SVG tag mode."
+
+  (when notebook--active-tags
+    (font-lock-remove-keywords nil
+               (mapcar #'notebook--build-keywords notebook--active-tags)))
+  (setq notebook--active-tags nil)
+
+  ;; Remove advices on remove-text-properties (before & after)
+  (advice-remove 'org-fontify-meta-lines-and-blocks
+                 #'notebook--remove-text-properties-on)
+  (advice-remove 'org-fontify-meta-lines-and-blocks
+                 #'notebook--remove-text-properties-off)
+
+  ;; Redisplay everything to hide tags
+  (font-lock-flush))
+
 
 (define-minor-mode notebook-mode
-  "Toggle notebook mode"
-  :group 'org-mode
-  :global t
-  :init-value nil
-
+  "Minor mode for graphical tag as rounded box."
+  :group 'notebook
   (if notebook-mode
-      (notebook--activate)
-    (notebook--deactivate)))
+      (notebook-mode-on)
+    (notebook-mode-off)))
+
+(define-globalized-minor-mode
+   global-notebook-mode notebook-mode notebook-mode-on)
+
+(provide 'notebook)
+;;; notebook.el ends here

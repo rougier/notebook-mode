@@ -23,6 +23,10 @@ body {
     margin-bottom: 5em;
 }
 
+b {
+    font-weight: 400;
+}
+
 a {
     color: #673AB7;
     text-decoration: none;
@@ -65,35 +69,11 @@ div.abstract {
     line-height: 1.25em;
     font-family: "Roboto Condensed", sans-serif;
     border: .5px solid #555599;
+    padding-bottom: 0.25em;
 }
 div.abstract p {
     column-count: 1;
     margin: 0 0 0.5em 0;
-}
-div.abstract p::before {
-    content: "Abstract:"; 
-    font-weight: 400;
-}
-div.keywords p {
-    margin: 0;
-}
-div.keywords p::before {
-    content: "Keywords:"; 
-    font-weight: 400;
-}
-div.license p {
-    margin: 0;
-}
-div.license p::before {
-    content: "License:"; 
-    font-weight: 400;
-}
-div.environment p::before {
-    content: "Environment:"; 
-    font-weight: 400;
-}
-div.environment p {
-    margin: 0;
 }
 
 div.figure {

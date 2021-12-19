@@ -3,7 +3,7 @@
 "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en" xml:lang="en">
 <head>
-<!-- 2021-12-16 Thu 18:38 -->
+<!-- 2021-12-19 Sun 19:57 -->
 <meta http-equiv="Content-Type" content="text/html;charset=utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>GNU Emacs Notebooks</title>
@@ -39,54 +39,35 @@
 <br />
 <span class="subtitle"><a href="https://www.labri.fr/perso/nrougier/">Nicolas P. Rougier</a> — Bordeaux, December 2021</span>
 </h1>
-<div class="setup" id="org202ed5c">
-
-</div>
-<div class="abstract" id="org7b114f9">
+<div class="abstract" id="org271206e">
 <p>
-Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
+<b>Abstract:</b> Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
 </p>
 
-<div class="keywords" id="org30cac07">
 <p>
-GNU Emacs, org-mode, org-babel, notebook, literate programming.
-</p>
-
-</div>
-
-<div class="environment" id="org7c29720">
-<p>
-<a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2, <a href="https://www.gnu.org/software/emacs/">Org mode</a> 9.5.1 &amp; <a href="https://www.python.org/">Python</a> 3.8.10
+<b>Keywords:</b> GNU Emacs, org-mode, notebook, literate programming<br />
+<b>Environment:</b> <a href="https://www.gnu.org/software/emacs/">Emacs</a> 27.2, <a href="https://www.gnu.org/software/emacs/">Org mode</a> 9.5.1 &amp; <a href="https://www.python.org/">Python</a> 3.8.10<br />
+<b>License:</b> Creative Commons CC-BY 4.0
 </p>
 
 </div>
 
-<div class="license" id="org944d2d7">
-<p>
-Creative Commons CC-BY 4.0
-</p>
-
-</div>
-
-</div>
-
-
-<div id="outline-container-org9d580b5" class="outline-2">
-<h2 id="org9d580b5">Introduction</h2>
-<div class="outline-text-2" id="text-org9d580b5">
+<div id="outline-container-org0ef89de" class="outline-2">
+<h2 id="org0ef89de">Introduction</h2>
+<div class="outline-text-2" id="text-org0ef89de">
 <blockquote>
 <p>
-Literate programming is a programming paradigm introduced by <a href="https://en.wikipedia.org/wiki/Donald_Knuth">Donald Knuth</a> in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [<a href="#citeproc_bib_item_1">Knuth 1984</a>]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. &#x2014; <a href="https://en.wikipedia.org/wiki/Literate_programming">Wikipedia</a>
+Literate programming is a programming paradigm introduced by <a href="https://en.wikipedia.org/wiki/Donald_Knuth">Donald Knuth</a> in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [<a href="#citeproc_bib_item_1">Knuth 1984</a>]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. &#x2014; <a href="https://en.wikipedia.org/wiki/Literate_programming">Wikipedia</a>   
 </p>
 </blockquote>
 
 <p>
-Emacs is an <i>extensible, customizable, self-documenting, real-time display editor</i> whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is <a href="https://orgmode.org/">org-mode</a> which is a major mode for <i>keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system</i>. The goal of the <a href="https://github.com/rougier/notebook-mode">notebook mode</a> is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top right) or run individual code cells using the run button in the margin as illustrated on figure <a href="#org2ed3d00">1</a>. The populated notebook can then be exported to HTML using the export button at the top right. The HTML document you're currently reading is actually an export of the file <a href="notebook.html">notebook.org</a>.
+Emacs is an extensible, customizable, self-documenting, real-time display editor whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is <a href="https://orgmode.org/">org-mode</a> which is a major mode for keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system (orgmode website). The goal of the <a href="https://github.com/rougier/notebook-mode">notebook mode</a> is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top) or run individual code cells using the run button in the margin as illustrated on figure <a href="#org5059e61">1</a>. The populated notebook can then be exported to HTML using the export button at the top. The HTML document you're currently reading is actually an export of the file <a href="notebook.html">notebook.org</a>.
 </p>
 
-<div class="sidefig" id="orgcd53ef6">
+<div class="sidefig" id="org3712ec0">
 
-<div id="org2ed3d00" class="figure">
+<div id="org5059e61" class="figure">
 <p><img src="notebook.png" alt="notebook.png" />
 </p>
 <p><span class="figure-number">Figure 1: </span><b>The org notebook as rendered inside GNU Emacs.</b> <a href="https://www.gnu.org/software/emacs/">GNU Emacs</a> can be hacked such as to offer a clean and legible interface for the notebook that is is actually a regular <a href="https://orgmode.org/">org-mode</a> document. This means a user can write and run the notebook fully inside Emacs, without the need to install any extra tools (but the different languages used inside the notebook, of course). In other words, everything is handled by Emacs. The advantage of the org notebook is that you can have block of code in any language and even mix them. This actually what have been used to display the enviroment in the abstract box, mixing Emacs lisp and Python. The theme used in the screenshot is <a href="https://github.com/rougier/nano-theme">NΛNO Theme</a> (available on <a href="https://elpa.gnu.org/">ELPA</a>) and the font is <a href="https://fonts.google.com/specimen/Roboto+Mono">Roboto Mono</a>. See [<a href="#citeproc_bib_item_2">Rougier 2020</a>] for further details.</p>
@@ -96,16 +77,15 @@ Emacs is an <i>extensible, customizable, self-documenting, real-time display edi
 </div>
 </div>
 
-
-<div id="outline-container-orga458da0" class="outline-2">
-<h2 id="orga458da0">Using the notebook</h2>
-<div class="outline-text-2" id="text-orga458da0">
+<div id="outline-container-org4041444" class="outline-2">
+<h2 id="org4041444">Using the notebook</h2>
+<div class="outline-text-2" id="text-org4041444">
 <p>
-Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. There are however some subtle differences that have been introduced. The first difference relates to the execution fo code blocks. The notebook is considered to be a sequence of code blocks such that when you execute a given code block, all subsequent code blocks will be invalidated, mearning their results will be cleared. This behavior can be modified but this is the default behavior. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing <a href="#org64f505d">1</a> and the corresponding output).
+Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing <a href="#orgbb547fd">1</a> and the corresponding output).
 </p>
 
 <div class="org-src-container">
-<label class="org-src-name"><span class="listing-number">Listing 1: </span>Hello world in Python from the org notebook.</label><pre class="src src-python" id="org64f505d"><span class="org-keyword">print</span>(<span class="org-string">"Hello world!"</span>)
+<label class="org-src-name"><span class="listing-number">Listing 1: </span>Hello world in Python from the org notebook.</label><pre class="src src-python" id="orgbb547fd"><span class="org-keyword">print</span>(<span class="org-string">"Hello world!"</span>)
 </pre>
 </div>
 <pre class="example">
@@ -114,15 +94,16 @@ Hello world!
 
 
 <p>
-What is more interesting is the ability for the notebook to produce figures from code and to associate a caption and a label such that they can be inserted directly into the document and referenced elsewhere in the text. Let's try that with Python and matplotlib in order to produce the figure <a href="#orgc209839">2</a> below.
+What is more interesting is the ability for the notebook to produce figures from code and to associate a caption and a label such that they can be inserted directly into the document and referenced elsewhere in the text. Let's try that with Python and matplotlib in order to produce the figure <a href="#org3e55e4a">2</a> below.
 </p>
 
 
-<div id="orgc209839" class="figure">
+<div id="org3e55e4a" class="figure">
 <p><img src="figure.png" alt="figure.png" />
 </p>
 <p><span class="figure-number">Figure 2: </span>Damped oscillations using \(y=\frac{sin(x)}{x}\)</p>
 </div>
+
 
 <p>
 From this simple example, you can start experimenting with literate
@@ -133,11 +114,9 @@ document is automatically generated when the document is exported and it mixes c
 </div>
 </div>
 
-
-
-<div id="outline-container-orgcf3d825" class="outline-2">
-<h2 id="orgcf3d825">References</h2>
-<div class="outline-text-2" id="text-orgcf3d825">
+<div id="outline-container-org2ea14a3" class="outline-2">
+<h2 id="org2ea14a3">References</h2>
+<div class="outline-text-2" id="text-org2ea14a3">
 <style>.csl-entry{text-indent: -1.5em; margin-left: 1.5em;}</style><div class="csl-bib-body">
   <div class="csl-entry"><a id="citeproc_bib_item_1"></a><span style="font-variant:small-caps;">Knuth, D.E.</span> 1984. <a href="https://doi.org/10.1093/comjnl/27.2.97">Literate programming</a>. <i>The computer journal</i> <i>27</i>, 2, 97–111.</div>
   <div class="csl-entry"><a id="citeproc_bib_item_2"></a><span style="font-variant:small-caps;">Rougier, N.P.</span> 2020. <a href="https://arxiv.org/abs/2008.06030">On the design of text editors</a>. <i>Arxiv</i>.</div>

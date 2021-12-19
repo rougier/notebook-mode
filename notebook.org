@@ -1,41 +1,29 @@
 
-#+begin_setup
-#+begin_src emacs-lisp :results none :exports none
-(setq org-cite-csl-styles-dir ".")
-(setq org-babel-python-command "/opt/anaconda3/bin/python")
-(require 'ob-python)
-(require 'oc-csl)
-nil
-#+end_src
-#+end_setup
+# -----------------------------------------------------------------------------
+# You can click on the buttons below to execute the corresponding command:
+#
+# 1. |SETUP|   : Setup notebook environment (mandatory)
+# 2. |RUN ALL| : Run all notebook code blocks (optional)
+# 3. |EXPORT|  : Export notebook to html (optional)
+#
+# You can run individuals code blocks by clicking on |RUN| or |CALL| buttons 
+# -----------------------------------------------------------------------------
+
 #+begin_abstract
-Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
+*Abstract:* Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
 
-#+begin_keywords
-#+KEYWORDS:
-GNU Emacs, org-mode, org-babel, notebook, literate programming.
-#+end_keywords
-
-#+begin_environment
-#+begin_src python :results raw :exports results :var python=python-version emacs=emacs-version org=org-version
-return f"{emacs}, {org} & {python}"
-#+end_src
-#+end_environment
-
-#+begin_license
-Creative Commons CC-BY 4.0
-#+end_license
-
-
+*Keywords:* GNU Emacs, org-mode, notebook, literate programming\\
+*Environment:* call_document-info()\\
+*License:* Creative Commons CC-BY 4.0
 #+end_abstract
 
 * Introduction
 
 #+begin_quote
-    Literate programming is a programming paradigm introduced by [[https://en.wikipedia.org/wiki/Donald_Knuth][Donald Knuth]] in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [cite:@Knuth:1984]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. --- [[https://en.wikipedia.org/wiki/Literate_programming][Wikipedia]]
+   Literate programming is a programming paradigm introduced by [[https://en.wikipedia.org/wiki/Donald_Knuth][Donald Knuth]] in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [cite:@Knuth:1984]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. --- [[https://en.wikipedia.org/wiki/Literate_programming][Wikipedia]]   
 #+end_quote
 
-Emacs is an /extensible, customizable, self-documenting, real-time display editor/ whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is [[https://orgmode.org/][org-mode]] which is a major mode for /keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system/. The goal of the [[https://github.com/rougier/notebook-mode][notebook mode]] is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top right) or run individual code cells using the run button in the margin as illustrated on figure [[fig:teaser]]. The populated notebook can then be exported to HTML using the export button at the top right. The HTML document you're currently reading is actually an export of the file [[file:notebook.org][notebook.org]].
+Emacs is an extensible, customizable, self-documenting, real-time display editor whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is [[https://orgmode.org/][org-mode]] which is a major mode for keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system (orgmode website). The goal of the [[https://github.com/rougier/notebook-mode][notebook mode]] is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top) or run individual code cells using the run button in the margin as illustrated on figure [[fig:teaser]]. The populated notebook can then be exported to HTML using the export button at the top. The HTML document you're currently reading is actually an export of the file [[file:notebook.org][notebook.org]].
 
 #+begin_sidefig
 #+name: fig:teaser
@@ -43,9 +31,7 @@ Emacs is an /extensible, customizable, self-documenting, real-time display edito
 [[file:notebook.png]]
 #+end_sidefig
 
-
-* Using the notebook
-
+* Using the notebook                                                          
 
 Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing [[src:hello]] and the corresponding output).
 
@@ -77,23 +63,22 @@ return "figure.png"
 #+results: fig:oscillations
 [[file:figure.png]]
 
+
 From this simple example, you can start experimenting with literate
 programming in any language or combinations of languages. For
 example, the environment that is declared in the top box of this
 document is automatically generated when the document is exported and it mixes code in Python (to get Python version) and code in Emacs lisp (to get Emacs version). Possibilities are infinite.
 
-
-
 * References
-
 
 #+cite_export: csl acm-siggraph.csl
 #+bibliography: notebook.bib
 #+print_bibliography:
 
-
 * Notebook configuration :noexport:
-
+:PROPERTIES:
+:VISIBILITY: folded
+:END:
 
 This section is used for configuring various settings in the notebook appearance as well as defining various options for the export in HTML or PDF formats. You can change any of these settings.
 
@@ -106,7 +91,7 @@ This section is used for configuring various settings in the notebook appearance
 #+SUBTITLE:     [[https://www.labri.fr/perso/nrougier/][Nicolas P. Rougier]] — Bordeaux, December 2021
 #+AUTHOR:       Nicolas P. Rougier
 #+EMAIL:        nicolas.rougier@inria.fr
-#+DATE:         2021-12-13 Mon
+#+DATE:         2021-12-19 Sun
 #+DESCRIPTION:  A GNU Emacs notebook demonstration
 #+OPTIONS:      toc:nil   
 
@@ -134,6 +119,45 @@ This section is used for configuring various settings in the notebook appearance
 :VISIBILITY: folded
 :END:
 
+*** Notebook setup :lisp:
+
+#+name: setup
+#+header:
+#+begin_src emacs-lisp :results none :exports none :eval no-export
+(setq org-cite-csl-styles-dir ".")
+(setq org-babel-python-command "/opt/anaconda3/bin/python")
+(require 'ob-python)
+(require 'oc-csl)
+nil
+#+end_src
+
+*** Notebook run :lisp:
+
+#+name: run
+#+header: :var scope="all"
+#+begin_src emacs-lisp :results none :exports none :eval never
+(org-babel-execute-buffer)
+nil
+#+end_src
+
+*** Notebook export :lisp:
+
+#+name: export
+#+header: :var target="html"
+#+begin_src emacs-lisp :results none :exports none :eval never
+(when (string= target "html")
+  (org-html-export-to-html))
+#+end_src
+
+*** Notebook information :lisp:
+
+#+name: document-info
+#+header: :var python=python-version emacs=emacs-version org=org-version
+#+begin_src python :results raw :exports results
+return f"{emacs}, {org} & {python}"
+#+end_src
+#+RESULTS: document-info
+
 *** Emacs version :lisp:
 
 #+name: emacs-version
@@ -141,6 +165,7 @@ This section is used for configuring various settings in the notebook appearance
 (format "[[https://www.gnu.org/software/emacs/][Emacs]] %d.%d"
         emacs-major-version emacs-minor-version)
 #+end_src
+#+RESULTS: emacs-version
 
 *** Org mode version :lisp:
 
@@ -149,6 +174,7 @@ This section is used for configuring various settings in the notebook appearance
 (format "[[https://www.gnu.org/software/emacs/][Org mode]] %s"
         (org-version nil nil))
 #+end_src
+#+RESULTS: org-version
 
 *** Python version :python:
 
@@ -167,6 +193,9 @@ import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 #+end_src
+
+#+RESULTS: pyfig-pre
+[[file:None]]
 
 *** Matplotlib figure finalization :python:
 
