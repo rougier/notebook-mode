@@ -41,14 +41,21 @@
 
 (defvar notebook--active-tags nil)
 
+(defun notebook--regex (string &optional prefix)
+  (let ((prefix (or prefix ":raw:")))
+    (if (string-prefix-p prefix string)
+        (substring string (length prefix))
+      (format "\\(%s\\)" string))))
+
+
 (defun notebook--build-keywords (item)
-  "Internal.  Build the list of keyword from ITEM."
-  (let ((pattern  (format "\\(%s\\)" (car item)))
+  "Build the list of keyword from a given."
+  (let ((pattern (notebook--regex (car item) ":raw:"))
         (tag      (nth 0 (cdr item)))
         (callback (nth 1 (cdr item)))
         (help     (nth 2 (cdr item))))
     (when (and (symbolp tag) (fboundp tag))
-      (setq tag `(,tag (match-string 0))))
+      (setq tag `(,tag (match-string 1))))
     (setq tag ``(face nil
                  display ,,tag
                  ,@(if ,callback '(pointer hand))
@@ -56,17 +63,22 @@
                  ,@(if ,callback `(keymap (keymap (mouse-1  . ,,callback))))))
     `(,pattern 1 ,tag)))
 
-(defun notebook-tag (tag face &optional inverse margin)
-  (let* ((margin (or margin 0))
+(defun notebook-tag-default (tag)
+  (notebook-tag (upcase (string-trim tag)) 'org-tag nil 0 0))
+  
+(defun notebook-tag (tag &optional face inverse margin radius)
+  (let* ((face (or face 'default))
+         (margin (or margin 0))
+         (radius (or radius 3))
          (alignment (if margin 0.0 0.5)))
     (if inverse
         (svg-lib-tag tag nil
-                     :padding 1 :margin margin :stroke 0  :radius 3
+                     :padding 1 :margin margin :stroke 0  :radius radius
                      :font-weight 'semibold :alignment alignment
                      :foreground  (face-background face nil 'default)
                      :background  (face-foreground face nil 'default))
       (svg-lib-tag tag nil
-                   :padding 1 :margin margin :stroke 2 :radius 3
+                   :padding 1 :margin margin :stroke 2 :radius radius
                    :font-weight 'regular  :alignment alignment
                    :foreground  (face-foreground face nil 'default)
                    :background  (face-background face nil 'default)))))
@@ -76,7 +88,12 @@
                              'notebook-call-at-point "Call function"))
         ("call_" .         ((notebook-tag "CALL" 'default nil 1)
                              'notebook-call-at-point "Call function"))
-        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-tag t)
+        ("src_" .          ((notebook-tag "CALL" 'default nil 1)
+                             'notebook-call-at-point "Execute code"))
+
+        (":raw:^#\\+begin_src\\( \\\w+\\)" .  (notebook-tag-default))
+
+        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-tag 1 0 0)
                              'notebook-run-at-point "Run code block"))
         ("|RUN|" .          ((notebook-tag "RUN" 'org-tag t)))
         ("|RUN ALL|" .      ((notebook-tag "RUN ALL" 'org-meta-line)
@@ -87,7 +104,7 @@
                              'notebook-export-html "Export the notebook to HTML"))
         ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
         ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
-        
+
         ("^#\\+end_src" .   ((notebook-tag "END" 'org-tag)))
         ("^#\\+caption:" .  ((notebook-tag "CAPTION" 'org-meta-line)))
         ("^#\\+name:" .     ((notebook-tag "NAME" 'org-meta-line)))
@@ -145,6 +162,7 @@
   (org-redisplay-inline-images)
   (org-indent-mode)
   (org-hide-block-all)
+  (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
 
   ;; Remove any active tags
   (when notebook--active-tags
@@ -182,6 +200,8 @@
   (advice-remove 'org-fontify-meta-lines-and-blocks
                  #'notebook--remove-text-properties-off)
 
+  (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
+  
   ;; Redisplay everything to hide tags
   (font-lock-flush))
 

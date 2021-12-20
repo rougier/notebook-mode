@@ -141,7 +141,10 @@ blockquote p {
 }
 
 /* --- Source blocks ------------------------------------------------------- */
-
+code {
+    font-family: "Roboto Mono", sans-serif;
+    font-weight: 300;
+}
 pre.example::before {
     display: block;
     background-color: #fffff;
@@ -161,7 +164,7 @@ pre.example {
 }
 
 pre.src {
-    font-size: 85%;
+    font-size: 95%;
     line-height: 1.4em;
     font-family: "Roboto Mono", sans-serif;
     font-weight: 300;

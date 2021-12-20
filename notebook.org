@@ -1,4 +1,5 @@
-
+# -----------------------------------------------------------------------------
+#+STARTUP: overview
 # -----------------------------------------------------------------------------
 # You can click on the buttons below to execute the corresponding command:
 #
@@ -25,16 +26,19 @@
 
 Emacs is an extensible, customizable, self-documenting, real-time display editor whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is [[https://orgmode.org/][org-mode]] which is a major mode for keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system (orgmode website). The goal of the [[https://github.com/rougier/notebook-mode][notebook mode]] is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top) or run individual code cells using the run button in the margin as illustrated on figure [[fig:teaser]]. The populated notebook can then be exported to HTML using the export button at the top. The HTML document you're currently reading is actually an export of the file [[file:notebook.org][notebook.org]].
 
+# ----------------------------------------------------------------------------
 #+begin_sidefig
 #+name: fig:teaser
 #+caption: *The org notebook as rendered inside GNU Emacs.* [[https://www.gnu.org/software/emacs/][GNU Emacs]] can be hacked such as to offer a clean and legible interface for the notebook that is is actually a regular [[https://orgmode.org/][org-mode]] document. This means a user can write and run the notebook fully inside Emacs, without the need to install any extra tools (but the different languages used inside the notebook, of course). In other words, everything is handled by Emacs. The advantage of the org notebook is that you can have block of code in any language and even mix them. This actually what have been used to display the enviroment in the abstract box, mixing Emacs lisp and Python. The theme used in the screenshot is [[https://github.com/rougier/nano-theme][NΛNO Theme]] (available on [[https://elpa.gnu.org/][ELPA]]) and the font is [[https://fonts.google.com/specimen/Roboto+Mono][Roboto Mono]]. See [cite:@Rougier:2020] for further details.
 [[file:notebook.png]]
 #+end_sidefig
+# ----------------------------------------------------------------------------
 
-* Using the notebook                                                          
+* Using the notebook
 
 Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing [[src:hello]] and the corresponding output).
 
+# ----------------------------------------------------------------------------
 #+name: src:hello
 #+caption: Hello world in Python from the org notebook.
 #+begin_src python :results output :exports both
@@ -42,27 +46,34 @@ print("Hello world!")
 #+end_src
 #+results: src:hello
 : Hello world!
+# ----------------------------------------------------------------------------
+
+The inline equivalent would result in: src_python{return "Hello world!"}
 
 What is more interesting is the ability for the notebook to produce figures from code and to associate a caption and a label such that they can be inserted directly into the document and referenced elsewhere in the text. Let's try that with Python and matplotlib in order to produce the figure [[fig:oscillations]] below.
 
+# ----------------------------------------------------------------------------
 #+name: fig:oscillations
+#+header: :var filename = "oscillations.png"
 #+begin_src python :results value file :exports results
 import numpy as np
 import matplotlib.pyplot as plt
-fig = plt.figure(figsize=(8,1))
+
+fig = plt.figure(figsize=(8, 1))
 ax = fig.add_axes([0,0,1,1], frameon=False)
 ax.axis("off")
 X = np.linspace(-10*np.pi, 10*np.pi, 500)
 ax.plot(X, np.sin(X)/X)
 ax.set_xlim(X.min(), X.max())
-plt.savefig("figure.png", dpi=200)
-return "figure.png"
+
+plt.savefig(filename)
+return filename
 #+end_src
 #+label: fig:oscillations
 #+caption: Damped oscillations using $y=\frac{sin(x)}{x}$
 #+results: fig:oscillations
-[[file:figure.png]]
-
+[[file:oscillations.png]]
+# ----------------------------------------------------------------------------
 
 From this simple example, you can start experimenting with literate
 programming in any language or combinations of languages. For
@@ -71,9 +82,11 @@ document is automatically generated when the document is exported and it mixes c
 
 * References
 
+# ----------------------------------------------------------------------------
 #+cite_export: csl acm-siggraph.csl
 #+bibliography: notebook.bib
 #+print_bibliography:
+# ----------------------------------------------------------------------------
 
 * Notebook configuration :noexport:
 :PROPERTIES:
@@ -145,8 +158,11 @@ nil
 #+name: export
 #+header: :var target="html"
 #+begin_src emacs-lisp :results none :exports none :eval never
-(when (string= target "html")
-  (org-html-export-to-html))
+(cond (((string= target "html")   (org-html-export-to-html))
+       ((string= target "pdf")    (org-latex-export-to-pdf))
+       ((string= target "tex")    (org-latex-export-to-latex))
+       ((string= target "latex")  (org-latex-export-to-latex))
+       (t  (message (format "Unknow backend (%s) for export" target)))))
 #+end_src
 
 *** Notebook information :lisp:
@@ -188,20 +204,25 @@ return f"[[https://www.python.org/][Python]] {version}"
 *** Matplotlib figure preparation :python:
 
 #+name: pyfig-pre
+#+header: :var width=8 height=1
 #+begin_src python :results file :exports none 
+import numpy as np
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+fig = plt.figure(figsize=(width,height))
+ax = fig.add_axes([0,0,1,1], frameon=False)
+ax.axis("off")
 #+end_src
-
-#+RESULTS: pyfig-pre
-[[file:None]]
 
 *** Matplotlib figure finalization :python:
 
 #+name: pyfig-post
+#+header: :var filename=""
 #+begin_src python :results file :exports none
-plt.savefig(filename, dpi=300)
-return filename
+if filename:
+    plt.savefig(filename, dpi=300)
+    return filename
+return ""
 #+end_src
 
