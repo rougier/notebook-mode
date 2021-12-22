@@ -63,54 +63,79 @@
                  ,@(if ,callback `(keymap (keymap (mouse-1  . ,,callback))))))
     `(,pattern 1 ,tag)))
 
-(defun notebook-tag-default (tag)
-  (notebook-tag (upcase (string-trim tag)) 'org-tag nil 0 0))
+(defun notebook-tag-language (tag)
+  (notebook-tag (upcase (string-trim tag)) 'org-meta-line nil 0 :crop-left t))
   
-(defun notebook-tag (tag &optional face inverse margin radius)
+(defun notebook-tag-default (tag)
+  (notebook-tag (upcase (string-trim tag)) 'org-meta-line nil))
+
+(defun notebook-tag (tag &optional face inverse margin &rest args)
   (let* ((face (or face 'default))
          (margin (or margin 0))
-         (radius (or radius 3))
          (alignment (if margin 0.0 0.5)))
     (if inverse
-        (svg-lib-tag tag nil
-                     :padding 1 :margin margin :stroke 0  :radius radius
+        (apply #'svg-lib-tag tag nil
+                     :padding 1 :margin margin :stroke 0 :radius 3
                      :font-weight 'semibold :alignment alignment
                      :foreground  (face-background face nil 'default)
-                     :background  (face-foreground face nil 'default))
-      (svg-lib-tag tag nil
-                   :padding 1 :margin margin :stroke 2 :radius radius
+                     :background  (face-foreground face nil 'default)
+                     args)
+      (apply #'svg-lib-tag tag nil
+                   :padding 1 :margin margin :stroke 2 :radius 3
                    :font-weight 'regular  :alignment alignment
                    :foreground  (face-foreground face nil 'default)
-                   :background  (face-background face nil 'default)))))
+                   :background  (face-background face nil 'default)
+                   args))))
 
 (setq notebook-tags
-      '(("^#\\+call:" .     ((notebook-tag "CALL" 'org-tag)
+      '(("^#\\+call:" .     ((notebook-tag "CALL" 'org-meta-line)
                              'notebook-call-at-point "Call function"))
         ("call_" .         ((notebook-tag "CALL" 'default nil 1)
                              'notebook-call-at-point "Call function"))
         ("src_" .          ((notebook-tag "CALL" 'default nil 1)
                              'notebook-call-at-point "Execute code"))
 
-        (":raw:^#\\+begin_src\\( \\\w+\\)" .  (notebook-tag-default))
-
-        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-tag 1 0 0)
+        ;; If you want (any) language as a tag
+        (":raw:^#\\+begin_src\\( [a-zA-Z\-]+\\)" .  (notebook-tag-language))
+        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-meta-line 1 0 :crop-right t)
                              'notebook-run-at-point "Run code block"))
-        ("|RUN|" .          ((notebook-tag "RUN" 'org-tag t)))
-        ("|RUN ALL|" .      ((notebook-tag "RUN ALL" 'org-meta-line)
-                             'notebook-run "Run all notebook code blocks"))
-        ("|SETUP|" .        ((notebook-tag "SETUP" 'org-meta-line)
-                             'notebook-setup "Setup notebook environment"))
-        ("|EXPORT|" .       ((notebook-tag "EXPORT" 'org-meta-line)
-                             'notebook-export-html "Export the notebook to HTML"))
-        ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
-        ("|CALL|" .         ((notebook-tag "CALL" 'org-meta-line)))
 
-        ("^#\\+end_src" .   ((notebook-tag "END" 'org-tag)))
-        ("^#\\+caption:" .  ((notebook-tag "CAPTION" 'org-meta-line)))
-        ("^#\\+name:" .     ((notebook-tag "NAME" 'org-meta-line)))
-        ("^#\\+header:" .   ((notebook-tag "HEADER" 'org-meta-line)))
-        ("^#\\+label:" .    ((notebook-tag "LABEL" 'org-meta-line)))
-        ("^#\\+results:"  . ((notebook-tag "RESULTS" 'org-meta-line)))))
+        ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-meta-line 1 0
+                                              :crop-right t)))
+        (":raw:^#\\+begin_export\\( [a-zA-Z\-]+\\)" .  (notebook-tag-language))
+         
+         ;; ("^#\\+begin_src" .    ((notebook-tag "RUN" 'org-tag 1)
+         ;; ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-tag 1)
+
+        (":raw:\\(:no\\)export:" .    ((notebook-tag "NO" 'org-meta-line 1 0 :crop-right t)))
+        (":raw::no\\(export:\\)" .    ((notebook-tag "EXPORT" 'org-meta-line nil 0 :crop-left t)))
+                                       
+         ;; ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-tag 1)
+
+        ;;                     'notebook-run-at-point "Run code block"))
+        ("|RUN|" .          ((notebook-tag "RUN" 'org-meta-line t)))
+        ("|RUN ALL|" .       ((notebook-tag "RUN ALL" 'org-meta-line)
+                              'notebook-run "Run all notebook code blocks"))
+        ("|SETUP|" .         ((notebook-tag "SETUP" 'org-meta-line)
+                              'notebook-setup "Setup notebook environment"))
+        ("|EXPORT|" .        ((notebook-tag "EXPORT" 'org-meta-line)
+                              'notebook-export-html "Export the notebook to HTML"))
+        ("|CALL|" .          ((notebook-tag "CALL" 'org-meta-line)))
+        ("|CALL|" .          ((notebook-tag "CALL" 'org-meta-line)))
+
+        ;; ("^#\\+[a-zA-Z\-_]+" . ((notebook-tag-default))
+                                              
+        ("^#\\+end_src" .    ((notebook-tag "END" 'org-meta-line)))
+        ("^#\\+end_export" . ((notebook-tag "END" 'org-meta-line)))
+
+        ("^#\\+caption:" .   ((notebook-tag "CAPTION" 'org-meta-line)))
+        ("^#\\+latex:" .     ((notebook-tag "LATEX" 'org-meta-line)))
+        ("^#\\+html:" .     ((notebook-tag  "LATEX" 'org-meta-line)))
+        ("^#\\+name:" .      ((notebook-tag "NAME" 'org-meta-line)))
+        ("^#\\+header:" .    ((notebook-tag "HEADER" 'org-meta-line)))
+        ("^#\\+label:" .     ((notebook-tag "LABEL" 'org-meta-line)))
+        ("^#\\+results:"  .  ((notebook-tag "RESULTS" 'org-meta-line)))
+        ))
 
 
 (defun notebook--remove-text-properties (oldfun start end props  &rest args)

@@ -10,6 +10,7 @@
 # You can run individuals code blocks by clicking on |RUN| or |CALL| buttons 
 # -----------------------------------------------------------------------------
 
+
 #+begin_abstract
 *Abstract:* Computational notebook is an environment for literate programming, that is, a programming method mixing code and prose. GNU Emacs facilitates the usage of such notebooks by providing users with a clean and legible interface such that people not familiar with code can nonetheless execute the whole document. Emacs notebooks are based on the powerful org-mode that provide all the necessary machinery to mix code and prose, execute code and export the whole document to HTML or PDF.  
 
@@ -112,6 +113,9 @@ This section is used for configuring various settings in the notebook appearance
 :PROPERTIES:
 :VISIBILITY: folded
 :END:
+
+#+begin_export html
+#+end_export
 
 #+OPTIONS:   num:nil
 #+OPTIONS:   html-style:nil
