@@ -24,10 +24,15 @@
 ;; see <https://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; 
+;;
+;; A minor mode to populate an org document with various SVG tags and
+;; buttons.
 ;;
 ;;
 ;;; News:
+;;
+;; Version 0.3
+;; Use of svg-tag-mode to implement buttons
 ;;
 ;; Version 0.2
 ;; Moved buttons inside documents
@@ -37,120 +42,99 @@
 ;;
 ;;; Code 
 (require 'org)
-(require 'svg-lib)
+(require 'svg-tag-mode)
 
-(defvar notebook--active-tags nil)
-
-(defun notebook--regex (string &optional prefix)
-  (let ((prefix (or prefix ":raw:")))
-    (if (string-prefix-p prefix string)
-        (substring string (length prefix))
-      (format "\\(%s\\)" string))))
-
-
-(defun notebook--build-keywords (item)
-  "Build the list of keyword from a given."
-  (let ((pattern (notebook--regex (car item) ":raw:"))
-        (tag      (nth 0 (cdr item)))
-        (callback (nth 1 (cdr item)))
-        (help     (nth 2 (cdr item))))
-    (when (and (symbolp tag) (fboundp tag))
-      (setq tag `(,tag (match-string 1))))
-    (setq tag ``(face nil
-                 display ,,tag
-                 ,@(if ,callback '(pointer hand))
-                 ,@(if ,help `(help-echo ,,help))
-                 ,@(if ,callback `(keymap (keymap (mouse-1  . ,,callback))))))
-    `(,pattern 1 ,tag)))
-
-(defun notebook-tag-language (tag)
-  (notebook-tag (upcase (string-trim tag)) 'org-meta-line nil 0 :crop-left t))
-  
-(defun notebook-tag-default (tag)
-  (notebook-tag (upcase (string-trim tag)) 'org-meta-line nil))
-
-(defun notebook-tag (tag &optional face inverse margin &rest args)
-  (let* ((face (or face 'default))
-         (margin (or margin 0))
-         (alignment (if margin 0.0 0.5)))
-    (if inverse
-        (apply #'svg-lib-tag tag nil
-                     :padding 1 :margin margin :stroke 0 :radius 3
-                     :font-weight 'semibold :alignment alignment
-                     :foreground  (face-background face nil 'default)
-                     :background  (face-foreground face nil 'default)
-                     args)
-      (apply #'svg-lib-tag tag nil
-                   :padding 1 :margin margin :stroke 2 :radius 3
-                   :font-weight 'regular  :alignment alignment
-                   :foreground  (face-foreground face nil 'default)
-                   :background  (face-background face nil 'default)
-                   args))))
-
-(setq notebook-tags
-      '(("^#\\+call:" .     ((notebook-tag "CALL" 'org-meta-line)
+(setq svg-tag-tags
+      '(
+        ;; Inline code
+        ;; --------------------------------------------------------------------
+        ("^#\\+call:" .     ((svg-tag-make "CALL"
+                                           :face 'org-meta-line)
                              'notebook-call-at-point "Call function"))
-        ("call_" .         ((notebook-tag "CALL" 'default nil 1)
+        ("call_" .         ((svg-tag-make "CALL"
+                                          :face 'default
+                                          :margin 1
+                                          :alignment 0)
                              'notebook-call-at-point "Call function"))
-        ("src_" .          ((notebook-tag "CALL" 'default nil 1)
+        ("src_" .          ((svg-tag-make "CALL"
+                                          :face 'default
+                                          :margin 1
+                                          :alignment 0)
                              'notebook-call-at-point "Execute code"))
 
-        ;; If you want (any) language as a tag
-        (":raw:^#\\+begin_src\\( [a-zA-Z\-]+\\)" .  (notebook-tag-language))
-        ("^#\\+begin_src" . ((notebook-tag "RUN" 'org-meta-line 1 0 :crop-right t)
+        ;; Code blocks
+        ;; --------------------------------------------------------------------
+        ("^#\\+begin_src\\( [a-zA-Z\-]+\\)" .  ((lambda (tag)
+                                                  (svg-tag-make (upcase tag)
+                                                                :face 'org-meta-line
+                                                                :crop-left t))))
+        ("^#\\+begin_src" . ((svg-tag-make "RUN"
+                                           :face 'org-meta-line
+                                           :inverse t
+                                           :crop-right t)
                              'notebook-run-at-point "Run code block"))
+        ("^#\\+end_src" .    ((svg-tag-make "END"
+                                            :face 'org-meta-line)))
 
-        ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-meta-line 1 0
+        
+        ;; Export blocks
+        ;; --------------------------------------------------------------------
+        ("^#\\+begin_export" . ((svg-tag-make "EXPORT"
+                                              :face 'org-meta-line
+                                              :inverse t
+                                              :alignment 0
                                               :crop-right t)))
-        (":raw:^#\\+begin_export\\( [a-zA-Z\-]+\\)" .  (notebook-tag-language))
-         
-         ;; ("^#\\+begin_src" .    ((notebook-tag "RUN" 'org-tag 1)
-         ;; ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-tag 1)
+        ("^#\\+begin_export\\( [a-zA-Z\-]+\\)" .  ((lambda (tag)
+                                                     (svg-tag-make (upcase tag)
+                                                                   :face 'org-meta-line
+                                                                   :crop-left t))))
+        ("^#\\+end_export" . ((svg-tag-make "END"
+                                            :face 'org-meta-line)))
 
-        (":raw:\\(:no\\)export:" .    ((notebook-tag "NO" 'org-meta-line 1 0 :crop-right t)))
-        (":raw::no\\(export:\\)" .    ((notebook-tag "EXPORT" 'org-meta-line nil 0 :crop-left t)))
-                                       
-         ;; ("^#\\+begin_export" . ((notebook-tag "EXPORT" 'org-tag 1)
+        ;; :noexport: tag
+        ;; --------------------------------------------------------------------
+        ("\\(:no\\)export:" .    ((svg-tag-make "NO"
+                                                :face 'org-meta-line
+                                                :inverse t
+                                                :crop-right t)))
+        (":no\\(export:\\)" .    ((svg-tag-make "EXPORT"
+                                                :face 'org-meta-line
+                                                :crop-left t)))
 
-        ;;                     'notebook-run-at-point "Run code block"))
-        ("|RUN|" .          ((notebook-tag "RUN" 'org-meta-line t)))
-        ("|RUN ALL|" .       ((notebook-tag "RUN ALL" 'org-meta-line)
+        ;; Miscellaneous keywords
+        ;; --------------------------------------------------------------------
+        ("|RUN|" .          ((svg-tag-make "RUN"
+                                           :face 'org-meta-line
+                                           :inverse t)))
+        ("|RUN ALL|" .       ((svg-tag-make "RUN ALL"
+                                            :face 'org-meta-line)
                               'notebook-run "Run all notebook code blocks"))
-        ("|SETUP|" .         ((notebook-tag "SETUP" 'org-meta-line)
+        ("|SETUP|" .         ((svg-tag-make "SETUP"
+                                            :face 'org-meta-line)
                               'notebook-setup "Setup notebook environment"))
-        ("|EXPORT|" .        ((notebook-tag "EXPORT" 'org-meta-line)
+        ("|EXPORT|" .        ((svg-tag-make "EXPORT"
+                                            :face 'org-meta-line)
                               'notebook-export-html "Export the notebook to HTML"))
-        ("|CALL|" .          ((notebook-tag "CALL" 'org-meta-line)))
-        ("|CALL|" .          ((notebook-tag "CALL" 'org-meta-line)))
+        ("|CALL|" .          ((svg-tag-make "CALL"
+                                            :face 'org-meta-line)))
 
-        ;; ("^#\\+[a-zA-Z\-_]+" . ((notebook-tag-default))
-                                              
-        ("^#\\+end_src" .    ((notebook-tag "END" 'org-meta-line)))
-        ("^#\\+end_export" . ((notebook-tag "END" 'org-meta-line)))
+        ;; Miscellaneous properties
+        ;; --------------------------------------------------------------------
+        ("^#\\+caption:" .   ((svg-tag-make "CAPTION"
+                                            :face 'org-meta-line)))
+        ("^#\\+latex:" .     ((svg-tag-make "LATEX"
+                                            :face 'org-meta-line)))
+        ("^#\\+html:" .      ((svg-tag-make "HTML"
+                                            :face 'org-meta-line)))
+        ("^#\\+name:" .      ((svg-tag-make "NAME"
+                                            :face 'org-meta-line)))
+        ("^#\\+header:" .    ((svg-tag-make "HEADER"
+                                            :face 'org-meta-line)))
+        ("^#\\+label:" .     ((svg-tag-make "LABEL"
+                                            :face 'org-meta-line)))
+        ("^#\\+results:"  .  ((svg-tag-make "RESULTS"
+                                            :face 'org-meta-line)))))
 
-        ("^#\\+caption:" .   ((notebook-tag "CAPTION" 'org-meta-line)))
-        ("^#\\+latex:" .     ((notebook-tag "LATEX" 'org-meta-line)))
-        ("^#\\+html:" .     ((notebook-tag  "LATEX" 'org-meta-line)))
-        ("^#\\+name:" .      ((notebook-tag "NAME" 'org-meta-line)))
-        ("^#\\+header:" .    ((notebook-tag "HEADER" 'org-meta-line)))
-        ("^#\\+label:" .     ((notebook-tag "LABEL" 'org-meta-line)))
-        ("^#\\+results:"  .  ((notebook-tag "RESULTS" 'org-meta-line)))
-        ))
-
-
-(defun notebook--remove-text-properties (oldfun start end props  &rest args)
-  "This apply remove-text-properties with 'display removed from props"
-  (apply oldfun start end (org-plist-delete props 'display) args))
-
-(defun notebook--remove-text-properties-on (args)
-  "This installs an advice around remove-text-properties"
-  (advice-add 'remove-text-properties
-              :around #'notebook--remove-text-properties))
-
-(defun notebook--remove-text-properties-off (args)
-  "This removes the advice around remove-text-properties"
-  (advice-remove 'remove-text-properties
-                 #'notebook--remove-text-properties))
 
 (defun notebook-run-at-point ()
   (interactive)
@@ -188,48 +172,13 @@
   (org-indent-mode)
   (org-hide-block-all)
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-
-  ;; Remove any active tags
-  (when notebook--active-tags
-    (font-lock-remove-keywords nil
-          (mapcar #'notebook--build-keywords notebook--active-tags)))
-
-  ;; Install keyword tags
-  (when notebook-tags
-    (font-lock-add-keywords nil
-                            (mapcar #'notebook--build-keywords notebook-tags)))
-  (setq notebook--active-tags (copy-sequence notebook-tags))
-
-  ;; Install advices on remove-text-properties (before & after). This
-  ;; is a hack to prevent org mode from removing SVG tags that use the
-  ;; 'display property
-  (advice-add 'org-fontify-meta-lines-and-blocks
-            :before #'notebook--remove-text-properties-on)
-  (advice-add 'org-fontify-meta-lines-and-blocks
-              :after #'notebook--remove-text-properties-off)
-
-  ;; Redisplay everything to show tags
-  (font-lock-flush))
+  (svg-tag-mode 1))
 
 (defun notebook-mode-off ()
   "Deactivate SVG tag mode."
 
-  (when notebook--active-tags
-    (font-lock-remove-keywords nil
-               (mapcar #'notebook--build-keywords notebook--active-tags)))
-  (setq notebook--active-tags nil)
-
-  ;; Remove advices on remove-text-properties (before & after)
-  (advice-remove 'org-fontify-meta-lines-and-blocks
-                 #'notebook--remove-text-properties-on)
-  (advice-remove 'org-fontify-meta-lines-and-blocks
-                 #'notebook--remove-text-properties-off)
-
-  (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-  
-  ;; Redisplay everything to hide tags
-  (font-lock-flush))
-
+  (svg-tag-mode -1)
+  (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
 (define-minor-mode notebook-mode
   "Minor mode for graphical tag as rounded box."
