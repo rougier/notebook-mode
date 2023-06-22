@@ -50,17 +50,17 @@
         ;; --------------------------------------------------------------------
         ("^#\\+call:" .     ((lambda (tag) (svg-tag-make "CALL"
                                            :face 'org-meta-line))
-                             'notebook-call-at-point "Call function"))
+                             (lambda () (interactive) (notebook-call-at-point)) "Call function"))
         ("call_" .         ((lambda (tag) (svg-tag-make "CALL"
                                           :face 'default
                                           :margin 1
                                           :alignment 0))
-                             'notebook-call-at-point "Call function"))
+                            (lambda () (interactive) (notebook-call-at-point)) "Call function"))
         ("src_" .          ((lambda (tag) (svg-tag-make "CALL"
                                           :face 'default
                                           :margin 1
                                           :alignment 0))
-                             'notebook-call-at-point "Execute code"))
+                             (lambda () (interactive) (notebook-call-at-point)) "Execute code"))
 
         ;; Code blocks
         ;; --------------------------------------------------------------------
@@ -72,7 +72,7 @@
                                            :face 'org-meta-line
                                            :inverse t
                                            :crop-right t))
-                             'notebook-run-at-point "Run code block"))
+                             (lambda () (interactive) (notebook-run-at-point)) "Run code block"))
         ("^#\\+end_src" .    ((lambda (tag) (svg-tag-make "END"
                                             :face 'org-meta-line))))
 
@@ -108,15 +108,30 @@
                                            :inverse t))))
         ("|RUN ALL|" .       ((lambda (tag) (svg-tag-make "RUN ALL"
                                             :face 'org-meta-line))
-                              'notebook-run "Run all notebook code blocks"))
+                             (lambda () (interactive) (notebook-run)) "Run all notebook code blocks"))
         ("|SETUP|" .         ((lambda (tag) (svg-tag-make "SETUP"
                                             :face 'org-meta-line))
-                              'notebook-setup "Setup notebook environment"))
+                             (lambda () (interactive) (notebook-setup)) "Setup notebook environment"))
         ("|EXPORT|" .        ((lambda (tag) (svg-tag-make "EXPORT"
                                             :face 'org-meta-line))
-                              'notebook-export-html "Export the notebook to HTML"))
+                             (lambda () (interactive) (notebook-export-html)) "Export the notebook to HTML"))
         ("|CALL|" .          ((lambda (tag) (svg-tag-make "CALL"
                                             :face 'org-meta-line))))
+
+        
+        ;; References
+        ;; --------------------------------------------------------------------
+        ("\\(\\[cite:@[A-Za-z]+:\\)" .
+         ((lambda (tag) (svg-tag-make (upcase tag)
+                                      :face 'nano-default
+                                      :inverse t
+                                      :beg 7 :end -1
+                                      :crop-right t))))
+        ("\\[cite:@[A-Za-z]+:\\([0-9a-z]+\\]\\)" .
+         ((lambda (tag) (svg-tag-make (upcase tag)
+                                      :face 'nano-default
+                                      :end -1
+                                      :crop-left t))))
 
         ;; Miscellaneous properties
         ;; --------------------------------------------------------------------

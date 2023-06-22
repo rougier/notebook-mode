@@ -21,7 +21,9 @@
 * Introduction
 
 #+begin_quote
+
    Literate programming is a programming paradigm introduced by [[https://en.wikipedia.org/wiki/Donald_Knuth][Donald Knuth]] in which a computer program is given an explanation of its logic in a natural language, such as English, interspersed with snippets of macros and traditional source code, from which compilable source code can be generated [cite:@Knuth:1984]. The approach is used in scientific computing and in data science routinely for reproducible research and open access purposes. --- [[https://en.wikipedia.org/wiki/Literate_programming][Wikipedia]]   
+
 #+end_quote
 
 Emacs is an extensible, customizable, self-documenting, real-time display editor whose development started in the mid-seventies. It is still under heavy development thanks to a large community of Emacs hackers. Among the many packages that come with Emacs, there is [[https://orgmode.org/][org-mode]] which is a major mode for keeping notes, authoring documents, computational notebooks, literate programming, maintaining to-do lists, planning projects, and more — in a fast and effective plain text system (orgmode website). The goal of the [[https://github.com/rougier/notebook-mode][notebook mode]] is to provide new users with an easy access to org-mode using a clean and legible interface such that people not familiar with GNU Emacs can nonetheless execute the whole document (using the button at the top) or run individual code cells using the run button in the margin as illustrated on figure [[fig:teaser]]. The populated notebook can then be exported to HTML using the export button at the top. The HTML document you're currently reading is actually an export of the file [[file:notebook.org][notebook.org]].
@@ -38,7 +40,6 @@ Emacs is an extensible, customizable, self-documenting, real-time display editor
 
 Since a notebook is a regular org-mode document, this means you can use any org command to execute individual code blocks or to export the notebook to HTML or PDF. Let's now experiment a bit with the notebook and for that, we'll use the Python language and starts with the mandatory "Hello world" program (see listing [[src:hello]] and the corresponding output).
 
-# ----------------------------------------------------------------------------
 #+name: src:hello
 #+caption: Hello world in Python from the org notebook.
 #+begin_src python :results output :exports both
@@ -46,13 +47,11 @@ print("Hello world!")
 #+end_src
 #+results: src:hello
 : Hello world!
-# ----------------------------------------------------------------------------
 
 The inline equivalent would result in: src_python{return "Hello world!"}
 
 What is more interesting is the ability for the notebook to produce figures from code and to associate a caption and a label such that they can be inserted directly into the document and referenced elsewhere in the text. Let's try that with Python and matplotlib in order to produce the figure [[fig:oscillations]] below.
 
-# ----------------------------------------------------------------------------
 #+name: fig:oscillations
 #+header: :var filename = "oscillations.png"
 #+begin_src python :results value file :exports results
@@ -73,7 +72,6 @@ return filename
 #+caption: Damped oscillations using $y=\frac{sin(x)}{x}$
 #+results: fig:oscillations
 [[file:oscillations.png]]
-# ----------------------------------------------------------------------------
 
 From this simple example, you can start experimenting with literate
 programming in any language or combinations of languages. For
@@ -82,11 +80,9 @@ document is automatically generated when the document is exported and it mixes c
 
 * References
 
-# ----------------------------------------------------------------------------
 #+cite_export: csl acm-siggraph.csl
 #+bibliography: notebook.bib
 #+print_bibliography:
-# ----------------------------------------------------------------------------
 
 * Notebook configuration :noexport:
 :PROPERTIES:
@@ -144,7 +140,7 @@ This section is used for configuring various settings in the notebook appearance
 #+header:
 #+begin_src emacs-lisp :results none :exports none :eval no-export
 (setq org-cite-csl-styles-dir ".")
-(setq org-babel-python-command "/opt/anaconda3/bin/python")
+(setq org-babel-python-command "/usr/loca/bin/python3")
 (require 'ob-python)
 (require 'oc-csl)
 nil
