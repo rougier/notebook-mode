@@ -159,6 +159,11 @@ same definition pattern as the `svg-tag-tags' alist (to which
 `notebook-tags' is added)."
   :group 'notebook)
 
+(defcustom notebook-hide-blocks t
+  "Default visibility of org blocks in `notebook-mode'.
+If non-nil, the org blocks are hidden when the mode is turned on."
+  :group 'notebook)
+
 (defun notebook-run-at-point ()
   (interactive)
   (org-ctrl-c-ctrl-c)
@@ -194,7 +199,7 @@ same definition pattern as the `svg-tag-tags' alist (to which
   (mapc #'(lambda (tag) (add-to-list 'svg-tag-tags tag)) notebook-tags)
   (org-redisplay-inline-images)
   (org-indent-mode)
-  (org-hide-block-all)
+  (if notebook-hide-blocks (org-hide-block-all))
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
   (svg-tag-mode 1))
 
@@ -202,6 +207,7 @@ same definition pattern as the `svg-tag-tags' alist (to which
   "Deactivate SVG tag mode."
 
   (svg-tag-mode -1)
+  (if notebook-hide-blocks (org-hide-block-all))
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
 (define-minor-mode notebook-mode
