@@ -53,6 +53,11 @@
   "Python interpreter's path."
   :group 'notebook)
 
+(defcustom notebook-cite-csl-styles-dir
+  "."
+  "CSL styles citations' directory."
+  :group 'notebook)
+
 (defcustom notebook-tags
       '(
         ;; Inline code
@@ -185,7 +190,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
 
 (defun notebook-setup ()
   (interactive)
-  (setq org-cite-csl-styles-dir ".")
+  (setq org-cite-csl-styles-dir notebook-cite-csl-styles-dir)
   (setq org-babel-python-command notebook-babel-python-command)
   (require 'ob-python)
   (require 'oc-csl))
