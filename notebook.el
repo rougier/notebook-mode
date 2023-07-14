@@ -40,7 +40,7 @@
 ;; Version 0.1
 ;; First proof of concept with buttons in margin
 ;;
-;;; Code 
+;;; Code:
 (require 'org)
 (require 'svg-tag-mode)
 
