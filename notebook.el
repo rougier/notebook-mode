@@ -156,9 +156,7 @@
   (org-ctrl-c-ctrl-c)
   (org-redisplay-inline-images))
 
-(defun notebook-call-at-point ()
-  (interactive)
-  (org-ctrl-c-ctrl-c))
+(defalias 'notebook-call-at-point 'org-ctrl-c-ctrl-c)
 
 (defun notebook-setup ()
   (interactive)
