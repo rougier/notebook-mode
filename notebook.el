@@ -178,7 +178,7 @@
   (org-html-export-to-html))
 
 (defun notebook-mode-on ()
-  "Activate SVG tag mode."
+  "Activate notebook mode."
 
   (add-to-list 'font-lock-extra-managed-props 'display)
   (setq font-lock-keywords-case-fold-search t)
@@ -192,7 +192,7 @@
   (svg-tag-mode 1))
 
 (defun notebook-mode-off ()
-  "Deactivate SVG tag mode."
+  "Deactivate notebook mode."
 
   (svg-tag-mode -1)
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
