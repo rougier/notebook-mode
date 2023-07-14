@@ -189,6 +189,7 @@
   (svg-tag-mode -1)
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
+;;;###autoload
 (define-minor-mode notebook-mode
   "Minor mode for graphical tag as rounded box."
   :group 'notebook
