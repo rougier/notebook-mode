@@ -165,9 +165,7 @@
   (require 'ob-python)
   (require 'oc-csl))
 
-(defun notebook-run ()
-  (interactive)
-  (org-babel-execute-buffer))
+(defalias 'notebook-run 'org-babel-execute-buffer)
 
 (defun notebook-export-html ()
   (interactive)
