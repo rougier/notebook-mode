@@ -181,7 +181,6 @@
   (add-to-list 'font-lock-extra-managed-props 'display)
   (setq font-lock-keywords-case-fold-search t)
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
-  (setq org-confirm-babel-evaluate nil)
   (setq org-startup-with-inline-images t)
   (org-redisplay-inline-images)
   (org-indent-mode)
