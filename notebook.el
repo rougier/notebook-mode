@@ -152,6 +152,7 @@
 
 
 (defun notebook-run-at-point ()
+  "Update notebook rendering at point."
   (interactive)
   (org-ctrl-c-ctrl-c)
   (org-redisplay-inline-images))
@@ -161,6 +162,7 @@
   (org-ctrl-c-ctrl-c))
 
 (defun notebook-setup ()
+  "Notebook mode setup function."
   (interactive)
   (setq org-cite-csl-styles-dir ".")
   (setq org-babel-python-command "/opt/anaconda3/bin/python")
