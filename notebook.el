@@ -167,9 +167,7 @@
 
 (defalias 'notebook-run 'org-babel-execute-buffer)
 
-(defun notebook-export-html ()
-  (interactive)
-  (org-html-export-to-html))
+(defalias 'notebook-export-html 'org-html-export-to-html)
 
 (defun notebook-mode-on ()
   "Activate SVG tag mode."
