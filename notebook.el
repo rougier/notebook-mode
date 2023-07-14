@@ -159,6 +159,11 @@ same definition pattern as the `svg-tag-tags' alist (to which
 `notebook-tags' is added)."
   :group 'notebook)
 
+(defcustom notebook-indent t
+  "Default document indentation.
+If non-nil, `org-indent' is called when the mode is turned on."
+  :group 'notebook)
+
 (defcustom notebook-hide-blocks t
   "Default visibility of org blocks in `notebook-mode'.
 If non-nil, the org blocks are hidden when the mode is turned on."
@@ -198,7 +203,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (setq org-startup-with-inline-images t)
   (mapc #'(lambda (tag) (add-to-list 'svg-tag-tags tag)) notebook-tags)
   (org-redisplay-inline-images)
-  (org-indent-mode)
+  (if notebook-indent (org-indent-mode))
   (if notebook-hide-blocks (org-hide-block-all))
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
   (svg-tag-mode 1))
@@ -207,6 +212,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   "Deactivate SVG tag mode."
 
   (svg-tag-mode -1)
+  (if notebook-indent (org-indent-mode -1))
   (if notebook-hide-blocks (org-hide-block-all))
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
