@@ -189,7 +189,8 @@
   (org-indent-mode)
   (org-hide-block-all)
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-  (svg-tag-mode 1))
+  (svg-tag-mode 1)
+  (message "notebook mode on"))
 
 (defun notebook-mode-off ()
   "Deactivate notebook mode."
