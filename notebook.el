@@ -48,6 +48,11 @@
   "Customization options for `notebook-mode'."
   :group 'org)
 
+(defcustom notebook-babel-python-command
+  "/opt/anaconda3/bin/python"
+  "Python interpreter's path."
+  :group 'notebook)
+
 (defcustom notebook-tags
       '(
         ;; Inline code
@@ -181,7 +186,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
 (defun notebook-setup ()
   (interactive)
   (setq org-cite-csl-styles-dir ".")
-  (setq org-babel-python-command "/opt/anaconda3/bin/python")
+  (setq org-babel-python-command notebook-babel-python-command)
   (require 'ob-python)
   (require 'oc-csl))
 
