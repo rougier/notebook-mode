@@ -44,6 +44,10 @@
 (require 'org)
 (require 'svg-tag-mode)
 
+(defgroup notebook nil
+  "Customization options for `notebook-mode'."
+  :group 'org)
+
 (setq svg-tag-tags
       '(
         ;; Inline code
