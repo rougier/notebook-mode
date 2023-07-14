@@ -48,7 +48,7 @@
   "Customization options for `notebook-mode'."
   :group 'org)
 
-(setq svg-tag-tags
+(defcustom notebook-tags
       '(
         ;; Inline code
         ;; --------------------------------------------------------------------
@@ -152,8 +152,12 @@
         ("^#\\+label:" .     ((lambda (tag) (svg-tag-make "LABEL"
                                             :face 'org-meta-line))))
         ("^#\\+results:"  .  ((lambda (tag) (svg-tag-make "RESULTS"
-                                            :face 'org-meta-line))))))
-
+                                            :face 'org-meta-line)))))
+  "The `notebook-mode' tags alist.
+This alist is the `notebook-mode' specific tags list.  It follows the
+same definition pattern as the `svg-tag-tags' alist (to which
+`notebook-tags' is added)."
+  :group 'notebook)
 
 (defun notebook-run-at-point ()
   (interactive)
@@ -187,6 +191,7 @@
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
   (setq org-confirm-babel-evaluate nil)
   (setq org-startup-with-inline-images t)
+  (mapc #'(lambda (tag) (add-to-list 'svg-tag-tags tag)) notebook-tags)
   (org-redisplay-inline-images)
   (org-indent-mode)
   (org-hide-block-all)
