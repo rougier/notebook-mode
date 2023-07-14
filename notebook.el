@@ -169,6 +169,10 @@ same definition pattern as the `svg-tag-tags' alist (to which
 `notebook-tags' is added)."
   :group 'notebook)
 
+(defcustom notebook-font-lock-case-insensitive t
+  "Make the keywords fontification case insensitive if non-nil."
+  :group 'notebook)
+
 (defcustom notebook-indent t
   "Default document indentation.
 If non-nil, `org-indent' is called when the mode is turned on."
@@ -207,7 +211,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   "Activate SVG tag mode."
 
   (add-to-list 'font-lock-extra-managed-props 'display)
-  (setq font-lock-keywords-case-fold-search t)
+  (setq font-lock-keywords-case-fold-search notebook-font-lock-case-insensitive)
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
   (setq org-confirm-babel-evaluate nil)
   (setq org-startup-with-inline-images t)
