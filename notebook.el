@@ -1,6 +1,6 @@
 ;;; notebook.el --- Notebook mode -*- lexical-binding: t -*-
 
-;; Copyright (C) 2021 Free Software Foundation, Inc.
+;; Copyright (C) 2021-2023 Free Software Foundation, Inc.
 
 ;; Maintainer: Nicolas P. Rougier <Nicolas.Rougier@inria.fr>
 ;; URL: https://github.com/rougier/notebook-mode
@@ -40,7 +40,7 @@
 ;; Version 0.1
 ;; First proof of concept with buttons in margin
 ;;
-;;; Code 
+;;; Code:
 (require 'org)
 (require 'svg-tag-mode)
 
@@ -184,6 +184,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   :group 'notebook)
 
 (defun notebook-run-at-point ()
+  "Update notebook rendering at point."
   (interactive)
   (org-ctrl-c-ctrl-c)
   (org-redisplay-inline-images))
@@ -191,6 +192,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
 (defalias 'notebook-call-at-point 'org-ctrl-c-ctrl-c)
 
 (defun notebook-setup ()
+  "Notebook mode setup function."
   (interactive)
   (setq org-cite-csl-styles-dir notebook-cite-csl-styles-dir)
   (setq org-babel-python-command notebook-babel-python-command)
@@ -202,7 +204,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
 (defalias 'notebook-export-html 'org-html-export-to-html)
 
 (defun notebook-mode-on ()
-  "Activate SVG tag mode."
+  "Activate notebook mode."
 
   (add-to-list 'font-lock-extra-managed-props 'display)
   (setq font-lock-keywords-case-fold-search notebook-font-lock-case-insensitive)
@@ -213,10 +215,11 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (if notebook-indent (org-indent-mode))
   (if notebook-hide-blocks (org-hide-block-all))
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
-  (svg-tag-mode 1))
+  (svg-tag-mode 1)
+  (message "notebook mode on"))
 
 (defun notebook-mode-off ()
-  "Deactivate SVG tag mode."
+  "Deactivate notebook mode."
 
   (svg-tag-mode -1)
   (if notebook-indent (org-indent-mode -1))
