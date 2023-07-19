@@ -44,7 +44,21 @@
 (require 'org)
 (require 'svg-tag-mode)
 
-(setq svg-tag-tags
+(defgroup notebook nil
+  "Customization options for `notebook-mode'."
+  :group 'org)
+
+(defcustom notebook-babel-python-command
+  "/opt/anaconda3/bin/python"
+  "Python interpreter's path."
+  :group 'notebook)
+
+(defcustom notebook-cite-csl-styles-dir
+  "."
+  "CSL styles citations' directory."
+  :group 'notebook)
+
+(defcustom notebook-tags
       '(
         ;; Inline code
         ;; --------------------------------------------------------------------
@@ -148,8 +162,26 @@
         ("^#\\+label:" .     ((lambda (tag) (svg-tag-make "LABEL"
                                             :face 'org-meta-line))))
         ("^#\\+results:"  .  ((lambda (tag) (svg-tag-make "RESULTS"
-                                            :face 'org-meta-line))))))
+                                            :face 'org-meta-line)))))
+  "The `notebook-mode' tags alist.
+This alist is the `notebook-mode' specific tags list.  It follows the
+same definition pattern as the `svg-tag-tags' alist (to which
+`notebook-tags' is added)."
+  :group 'notebook)
 
+(defcustom notebook-font-lock-case-insensitive t
+  "Make the keywords fontification case insensitive if non-nil."
+  :group 'notebook)
+
+(defcustom notebook-indent t
+  "Default document indentation.
+If non-nil, `org-indent' is called when the mode is turned on."
+  :group 'notebook)
+
+(defcustom notebook-hide-blocks t
+  "Default visibility of org blocks in `notebook-mode'.
+If non-nil, the org blocks are hidden when the mode is turned on."
+  :group 'notebook)
 
 (defun notebook-run-at-point ()
   (interactive)
@@ -162,8 +194,8 @@
 
 (defun notebook-setup ()
   (interactive)
-  (setq org-cite-csl-styles-dir ".")
-  (setq org-babel-python-command "/opt/anaconda3/bin/python")
+  (setq org-cite-csl-styles-dir notebook-cite-csl-styles-dir)
+  (setq org-babel-python-command notebook-babel-python-command)
   (require 'ob-python)
   (require 'oc-csl))
 
@@ -179,13 +211,14 @@
   "Activate SVG tag mode."
 
   (add-to-list 'font-lock-extra-managed-props 'display)
-  (setq font-lock-keywords-case-fold-search t)
+  (setq font-lock-keywords-case-fold-search notebook-font-lock-case-insensitive)
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
   (setq org-confirm-babel-evaluate nil)
   (setq org-startup-with-inline-images t)
+  (mapc #'(lambda (tag) (add-to-list 'svg-tag-tags tag)) notebook-tags)
   (org-redisplay-inline-images)
-  (org-indent-mode)
-  (org-hide-block-all)
+  (if notebook-indent (org-indent-mode))
+  (if notebook-hide-blocks (org-hide-block-all))
   (add-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images)
   (svg-tag-mode 1))
 
@@ -193,6 +226,8 @@
   "Deactivate SVG tag mode."
 
   (svg-tag-mode -1)
+  (if notebook-indent (org-indent-mode -1))
+  (if notebook-hide-blocks (org-hide-block-all))
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
 (define-minor-mode notebook-mode
