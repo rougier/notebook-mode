@@ -213,7 +213,6 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (add-to-list 'font-lock-extra-managed-props 'display)
   (setq font-lock-keywords-case-fold-search notebook-font-lock-case-insensitive)
   (setq org-image-actual-width `( ,(truncate (* (frame-pixel-width) 0.85))))
-  (setq org-confirm-babel-evaluate nil)
   (setq org-startup-with-inline-images t)
   (mapc #'(lambda (tag) (add-to-list 'svg-tag-tags tag)) notebook-tags)
   (org-redisplay-inline-images)

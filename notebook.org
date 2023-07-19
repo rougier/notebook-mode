@@ -228,3 +228,7 @@ if filename:
 return ""
 #+end_src
 
+* COMMENT Local Variables
+Local Variables:
+org-confirm-babel-evaluate: nil
+End:
