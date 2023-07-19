@@ -188,9 +188,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (org-ctrl-c-ctrl-c)
   (org-redisplay-inline-images))
 
-(defun notebook-call-at-point ()
-  (interactive)
-  (org-ctrl-c-ctrl-c))
+(defalias 'notebook-call-at-point 'org-ctrl-c-ctrl-c)
 
 (defun notebook-setup ()
   (interactive)
@@ -199,13 +197,9 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (require 'ob-python)
   (require 'oc-csl))
 
-(defun notebook-run ()
-  (interactive)
-  (org-babel-execute-buffer))
+(defalias 'notebook-run 'org-babel-execute-buffer)
 
-(defun notebook-export-html ()
-  (interactive)
-  (org-html-export-to-html))
+(defalias 'notebook-export-html 'org-html-export-to-html)
 
 (defun notebook-mode-on ()
   "Activate SVG tag mode."
@@ -229,6 +223,7 @@ If non-nil, the org blocks are hidden when the mode is turned on."
   (if notebook-hide-blocks (org-hide-block-all))
   (remove-hook 'org-babel-after-execute-hook 'org-redisplay-inline-images))
 
+;;;###autoload
 (define-minor-mode notebook-mode
   "Minor mode for graphical tag as rounded box."
   :group 'notebook
